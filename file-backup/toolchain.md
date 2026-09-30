@@ -4,7 +4,7 @@
 | --- | --- | --- | --- |
 | rustc | mise | Build | https://github.com/rust-lang/rust |
 | just | mise | Test recipe | https://github.com/casey/just |
-| ketch | see its README | Installs dunnage | https://github.com/listepo/ketch |
+| ketch | see its README | Installs dunnage | https://github.com/pyrlyn/ketch |
 | dunnage | ketch | Lossless cleanup of target/ after tests | https://github.com/listepo/dunnage |
 
 ## cargo
