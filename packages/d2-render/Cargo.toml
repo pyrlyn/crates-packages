@@ -1,0 +1,70 @@
+[package]
+name = "d2-render"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.86"
+description = "Render D2 diagrams to SVG/PNG through the d2 CLI, with structured diagnostics, freshness checks and an optional pure-Rust backend"
+license = "MIT AND MPL-2.0"
+repository = "https://github.com/listepo/crates-packages"
+keywords = ["d2", "diagram", "svg", "render"]
+categories = ["visualization", "command-line-utilities"]
+
+[features]
+default = []
+# Pure-Rust renderer for a subset of D2 (SVG only, no `d2` binary needed).
+native = []
+# ratatui widget showing render status and diagnostics.
+tui = ["dep:ratatui"]
+# HTML helpers: inline SVG, data URIs, standalone pages.
+web = []
+# Debounced file watching with automatic re-rendering.
+watch = ["dep:notify", "dep:notify-debouncer-mini"]
+full = ["native", "tui", "web", "watch"]
+
+[dependencies]
+sha2 = "0.10"
+tempfile = "3"
+ratatui = { version = "0.29", default-features = false, optional = true }
+notify = { version = "8", optional = true }
+notify-debouncer-mini = { version = "0.6", optional = true }
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[[example]]
+name = "native"
+required-features = ["native"]
+
+[[example]]
+name = "tui_report"
+required-features = ["tui"]
+
+[[example]]
+name = "web_page"
+required-features = ["web"]
+
+[[example]]
+name = "watch"
+required-features = ["watch"]
+
+[[test]]
+name = "native"
+required-features = ["native"]
+
+[[test]]
+name = "tui"
+required-features = ["tui"]
+
+[[test]]
+name = "web"
+required-features = ["web"]
+
+[[test]]
+name = "watch"
+required-features = ["watch"]
+
+[package.metadata.docs.rs]
+all-features = true
