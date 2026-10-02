@@ -45,6 +45,16 @@ pub fn measure(text: &str, font_size: f64, bold: bool) -> (f64, f64) {
     )
 }
 
+/// `(width, height)` in a monospace font (0.6 em per character).
+pub fn measure_mono(text: &str, font_size: f64) -> (f64, f64) {
+    let lines: Vec<&str> = text.split('\n').collect();
+    let cols = lines.iter().map(|l| l.chars().count()).max().unwrap_or(0);
+    (
+        (cols as f64 * 0.6 * font_size).ceil(),
+        (lines.len().max(1) as f64 * font_size * LINE_HEIGHT).ceil(),
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -35,6 +35,7 @@ fn page_is_complete_html() {
     assert!(!page.contains("<?xml"));
 }
 
+#[cfg(feature = "cli")]
 #[test]
 fn page_from_real_render() {
     let Some(r) = common::real_d2("page_from_real_render") else {
@@ -49,6 +50,7 @@ fn page_from_native_render() {
     page_from(Renderer::native());
 }
 
+#[cfg(any(feature = "native", feature = "cli"))]
 fn page_from(r: Renderer) {
     let dir = tempfile::tempdir().unwrap();
     let svg = dir.path().join("a.svg");

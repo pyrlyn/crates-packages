@@ -137,9 +137,29 @@ fn output_mapping() {
     );
 }
 
+#[cfg(feature = "native")]
+#[test]
+fn native_watch() {
+    let dir = tempfile::tempdir().unwrap();
+    let root = dir.path().canonicalize().unwrap();
+    let src = root.join("n.d2");
+    fs::write(&src, "a -> b").unwrap();
+    let config = WatchConfig {
+        debounce: Duration::from_millis(100),
+        render_on_start: true,
+        ..WatchConfig::default()
+    };
+    let (_h, rx) = watch_channel(Renderer::new(), &[root.clone()], config).unwrap();
+    next_render(&rx, "<svg");
+    std::thread::sleep(Duration::from_millis(300));
+    fs::write(&src, "a -> b -> natively").unwrap();
+    next_render(&rx, "natively");
+}
+
+#[cfg(feature = "cli")]
 #[test]
 fn real_d2_watch() {
-    let r = Renderer::new();
+    let r = Renderer::cli();
     if r.version().is_err() {
         eprintln!("SKIP real_d2_watch: d2 not available");
         return;

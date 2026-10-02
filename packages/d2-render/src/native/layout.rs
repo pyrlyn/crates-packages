@@ -14,8 +14,8 @@
 //! two-pass coordinate assignment. A container's size is then the box around
 //! its laid-out children, so nesting composes bottom-up.
 
-use super::graph::{Direction, Graph};
-use super::text::measure;
+use super::graph::{Direction, Graph, Near};
+use super::text::{measure, measure_mono};
 
 /// Font size of shape labels.
 pub const FONT_SIZE: f64 = 16.0;
@@ -27,6 +27,12 @@ const DUMMY_SEP: f64 = 20.0;
 const RANK_SEP: f64 = 60.0;
 const EDGE_LABEL_FONT: f64 = 16.0;
 const PARALLEL_GAP: f64 = 24.0;
+/// Icon size inside a shape.
+pub const ICON_SIZE: f64 = 32.0;
+/// Icon size next to a container's label.
+pub const CONTAINER_ICON: f64 = 24.0;
+const NEAR_GAP: f64 = 30.0;
+const GRID_GAP: f64 = 40.0;
 
 /// Axis-aligned box.
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -99,8 +105,14 @@ fn is_bold(g: &Graph, i: usize) -> bool {
 fn leaf_size(g: &Graph, i: usize) -> (f64, f64) {
     let o = &g.objects[i];
     let fs = font_size(g, i);
-    let (tw, th) = measure(o.label_text(), fs, is_bold(g, i));
-    let (w, h) = match o.shape.as_str() {
+    let mono = o.shape == "code" || o.style.font.as_deref() == Some("mono");
+    let (tw, th) = if mono {
+        measure_mono(o.label_text(), fs)
+    } else {
+        measure(o.label_text(), fs, is_bold(g, i))
+    };
+    let (mut w, mut h) = match o.shape.as_str() {
+        "image" => (tw.max(128.0), 128.0 + th + 8.0),
         "text" => (tw, th),
         "square" => {
             let s = (tw + 2.0 * NODE_PAD_X).max(th + 2.0 * NODE_PAD_Y);
@@ -121,10 +133,14 @@ fn leaf_size(g: &Graph, i: usize) -> (f64, f64) {
         "cylinder" | "stored_data" => (tw + 2.0 * NODE_PAD_X + 10.0, th + 2.0 * NODE_PAD_Y + 24.0),
         "document" => (tw + 2.0 * NODE_PAD_X, th + 2.0 * NODE_PAD_Y + 12.0),
         "package" | "page" => (tw + 2.0 * NODE_PAD_X + 10.0, th + 2.0 * NODE_PAD_Y + 10.0),
-        "person" => ((tw + 20.0).max(70.0), th + 100.0),
+        "person" | "c4-person" => ((tw + 20.0).max(70.0), th + 100.0),
         "callout" => (tw + 2.0 * NODE_PAD_X, th + 2.0 * NODE_PAD_Y + 20.0),
         _ => (tw + 2.0 * NODE_PAD_X, th + 2.0 * NODE_PAD_Y),
     };
+    if o.icon.is_some() && o.shape != "image" && o.shape != "text" {
+        h += ICON_SIZE + 8.0;
+        w = w.max(ICON_SIZE + 2.0 * NODE_PAD_X);
+    }
     (
         o.width.unwrap_or(w).round().max(5.0),
         o.height.unwrap_or(h).round().max(5.0),
@@ -170,6 +186,7 @@ pub fn layout(g: &Graph) -> Layout {
     let root_dir = g.objects[0].direction.unwrap_or_default();
     let (w, h) = ctx.size_of(0, root_dir);
     ctx.size[0] = (w, h);
+    ctx.place_near(w, h);
 
     // Absolute boxes, top-down.
     let mut boxes = vec![Rect::default(); n];
@@ -286,6 +303,10 @@ pub fn layout(g: &Graph) -> Layout {
         bounds.w = x2 - bounds.x;
         bounds.h = y2 - bounds.y;
     };
+    for b in boxes.iter().skip(1) {
+        grow(b.x, b.y);
+        grow(b.x + b.w, b.y + b.h);
+    }
     for r in &routes {
         for &(x, y) in &r.points {
             grow(x, y);
@@ -341,29 +362,129 @@ fn lift(g: &Graph, src: usize, dst: usize) -> (usize, Option<(usize, usize)>) {
 }
 
 impl Ctx<'_> {
+    /// Put root shapes with a `near` constant around the `w` x `h`
+    /// diagram; several shapes at one constant stack outwards.
+    fn place_near(&mut self, w: f64, h: f64) {
+        let mut stack: Vec<(Near, f64)> = Vec::new();
+        for &c in &self.g.objects[0].children {
+            let Some(near) = self.g.objects[c].near else {
+                continue;
+            };
+            let (ow, oh) = self.size[c];
+            let off = stack
+                .iter()
+                .filter(|(n, _)| *n == near)
+                .map(|(_, d)| d)
+                .sum::<f64>();
+            let vertical = !matches!(near, Near::CenterLeft | Near::CenterRight);
+            stack.push((
+                near,
+                if vertical {
+                    oh + NEAR_GAP
+                } else {
+                    ow + NEAR_GAP
+                },
+            ));
+            let above = -oh - NEAR_GAP - off;
+            let below = h + NEAR_GAP + off;
+            self.rel[c] = match near {
+                Near::TopLeft => (0.0, above),
+                Near::TopCenter => ((w - ow) / 2.0, above),
+                Near::TopRight => (w - ow, above),
+                Near::CenterLeft => (-ow - NEAR_GAP - off, (h - oh) / 2.0),
+                Near::CenterRight => (w + NEAR_GAP + off, (h - oh) / 2.0),
+                Near::BottomLeft => (0.0, below),
+                Near::BottomCenter => ((w - ow) / 2.0, below),
+                Near::BottomRight => (w - ow, below),
+            };
+        }
+    }
+
     /// Size of object `i`, laying out its children first.
     fn size_of(&mut self, i: usize, inherited: Direction) -> (f64, f64) {
-        let o = &self.g.objects[i];
+        let g = self.g;
+        let o = &g.objects[i];
         if o.children.is_empty() {
             return leaf_size(self.g, i);
         }
         let dir = o.direction.unwrap_or(inherited);
-        let children = o.children.clone();
-        for &c in &children {
+        for &c in &o.children {
             let s = self.size_of(c, dir);
             self.size[c] = s;
         }
-        let (cw, ch) = self.layout_children(i, &children, dir);
+        // Root shapes with a `near` constant are placed around the diagram
+        // afterwards, not in the layered layout.
+        let children: Vec<usize> = o
+            .children
+            .iter()
+            .copied()
+            .filter(|&c| i != 0 || self.g.objects[c].near.is_none())
+            .collect();
+        let (cw, ch) = if o.is_grid() {
+            self.layout_grid(i, &children)
+        } else {
+            self.layout_children(i, &children, dir)
+        };
         if i == 0 {
             return (cw, ch);
         }
-        let (lw, _) = measure(o.label_text(), font_size(self.g, i), true);
+        let (mut lw, _) = measure(o.label_text(), font_size(self.g, i), true);
+        if o.icon.is_some() {
+            lw += CONTAINER_ICON + 12.0;
+        }
         let w = (cw + 2.0 * CONTAINER_PAD).max(lw + 2.0 * CONTAINER_PAD);
         let h = ch + container_top(self.g, i) + CONTAINER_PAD;
         (
             o.width.unwrap_or(w).max(w).round(),
             o.height.unwrap_or(h).max(h).round(),
         )
+    }
+
+    /// Grid layout (`grid-rows` / `grid-columns`); returns the content size.
+    fn layout_grid(&mut self, parent: usize, children: &[usize]) -> (f64, f64) {
+        let o = &self.g.objects[parent];
+        let n = children.len().max(1);
+        let (rows, cols, row_major) = match (o.grid_rows, o.grid_columns) {
+            (Some(r), Some(c)) => (r.max(n.div_ceil(c)), c, true),
+            (None, Some(c)) => (n.div_ceil(c), c, true),
+            (Some(r), None) => (r, n.div_ceil(r), false),
+            (None, None) => (1, n, true),
+        };
+        let gap = o.grid_gap.unwrap_or(GRID_GAP);
+        let vgap = o.vertical_gap.unwrap_or(gap);
+        let hgap = o.horizontal_gap.unwrap_or(gap);
+        let cell = |k: usize| {
+            if row_major {
+                (k / cols, k % cols)
+            } else {
+                (k % rows, k / rows)
+            }
+        };
+        let mut col_w = vec![0.0f64; cols];
+        let mut row_h = vec![0.0f64; rows];
+        for (k, &c) in children.iter().enumerate() {
+            let (r, cl) = cell(k);
+            let (w, h) = self.size[c];
+            col_w[cl] = col_w[cl].max(w);
+            row_h[r] = row_h[r].max(h);
+        }
+        let mut xs = vec![0.0; cols];
+        for c in 1..cols {
+            xs[c] = xs[c - 1] + col_w[c - 1] + hgap;
+        }
+        let mut ys = vec![0.0; rows];
+        for r in 1..rows {
+            ys[r] = ys[r - 1] + row_h[r - 1] + vgap;
+        }
+        for (k, &c) in children.iter().enumerate() {
+            let (r, cl) = cell(k);
+            // Cells stretch their shape, as in D2.
+            self.size[c] = (col_w[cl], row_h[r]);
+            self.rel[c] = (xs[cl], ys[r]);
+        }
+        let w = xs.last().copied().unwrap_or(0.0) + col_w.last().copied().unwrap_or(0.0);
+        let h = ys.last().copied().unwrap_or(0.0) + row_h.last().copied().unwrap_or(0.0);
+        (w, h)
     }
 
     /// Place `children` of `parent`; returns the content size.
@@ -836,6 +957,24 @@ mod tests {
             }
         }
         assert_eq!(l.routes.len(), g.edges.len());
+    }
+
+    #[test]
+    fn near_goes_above_and_grid_is_regular() {
+        let (g, l) = lay("t: Title {near: top-center}\na -> b\ng: {grid-columns: 2; p; q; r}\n");
+        let idx = |k: &str| g.objects.iter().position(|o| o.abs == k).unwrap();
+        let (t, a) = (l.boxes[idx("t")], l.boxes[idx("a")]);
+        assert!(t.y + t.h < a.y);
+        let (p, q, r) = (
+            l.boxes[idx("g.p")],
+            l.boxes[idx("g.q")],
+            l.boxes[idx("g.r")],
+        );
+        assert_eq!(p.y, q.y);
+        assert!(q.x > p.x);
+        assert_eq!(r.x, p.x);
+        assert!(r.y > p.y);
+        assert_eq!(p.w, r.w);
     }
 
     #[test]

@@ -1,26 +1,31 @@
-//! Render a diagram with the default (pure-Rust) backend and print the report.
+//! Render through the d2 executable (`$D2_BIN` or `d2` on `$PATH`): every
+//! format, layout engine and D2 feature.
 //!
-//! cargo run -p d2-render --example basic -- [input.d2] [output.svg]
-//!
-//! Add `--features png` for `.png` output, or see the `cli` example for the
-//! d2 executable.
+//! cargo run -p d2-render --features cli --example cli -- [input.d2] [output.svg|png|pdf|txt]
 
 use std::path::PathBuf;
 
-use d2_render::{Error, Format, RenderOptions, Renderer};
+use d2_render::{Error, Format, Layout, RenderOptions, Renderer};
 
 fn main() -> Result<(), Error> {
     let mut args = std::env::args().skip(1);
     let input = args.next().map(PathBuf::from);
     let output = PathBuf::from(
         args.next()
-            .unwrap_or_else(|| "target/d2-example.svg".into()),
+            .unwrap_or_else(|| "target/d2-cli-example.svg".into()),
     );
     let format = Format::from_path(&output)?;
 
-    let renderer = Renderer::new().options(RenderOptions::new().theme(0).pad(20));
-    println!("using {}", renderer.version()?);
-
+    let renderer =
+        Renderer::cli().options(RenderOptions::new().layout(Layout::Elk).theme(200).pad(20));
+    match renderer.version() {
+        Ok(v) => println!("using d2 {v}"),
+        Err(e) if e.is_binary_not_found() => {
+            eprintln!("{e}");
+            std::process::exit(2);
+        }
+        Err(e) => return Err(e),
+    }
     let result = match &input {
         Some(path) => renderer.render_file_report(path, &output, format),
         None => renderer.render_str_report(

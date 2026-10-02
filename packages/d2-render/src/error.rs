@@ -55,6 +55,8 @@ pub enum Error {
     UnknownFormat(PathBuf),
     /// The file watcher failed (only with the `watch` feature).
     Watch(String),
+    /// Rasterizing SVG to PNG failed (native backend, feature `png`).
+    Raster(String),
 }
 
 impl Error {
@@ -119,6 +121,7 @@ impl fmt::Display for Error {
                 write!(f, "cannot infer an output format from {}", p.display())
             }
             Error::Watch(msg) => write!(f, "file watcher error: {msg}"),
+            Error::Raster(msg) => write!(f, "png rasterization failed: {msg}"),
         }
     }
 }

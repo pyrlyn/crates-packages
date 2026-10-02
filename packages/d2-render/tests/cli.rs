@@ -178,6 +178,14 @@ fn validate_uses_d2_validate() {
         err.diagnostics()[0].message,
         "connection missing destination"
     );
+    // `d2 validate` alone accepts semantic errors; the full check does not.
+    let cli = d2_render::CliBackend::new();
+    cli.validate_syntax(&fixture("invalid_semantic.d2"))
+        .unwrap();
+    let err = r
+        .validate_file(&fixture("invalid_semantic.d2"))
+        .unwrap_err();
+    assert_eq!(err.diagnostics().len(), 2, "{err:?}");
 }
 
 #[test]

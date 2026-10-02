@@ -20,9 +20,9 @@ pub struct BackendOutput {
 
 /// Something that turns a `.d2` file into an image.
 ///
-/// [`crate::CliBackend`] (the `d2` executable) is the default and supports
-/// the whole language; [`crate::NativeBackend`] (feature `native`) renders a
-/// subset in-process.
+/// `NativeBackend` (feature `native`, the default) renders a subset of D2
+/// in-process; `CliBackend` (feature `cli`) runs the `d2` executable and
+/// supports the whole language.
 pub trait Backend: Send + Sync + std::fmt::Debug {
     /// Short name for reports, e.g. `"cli"`.
     fn name(&self) -> &'static str;

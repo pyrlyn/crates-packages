@@ -14,7 +14,7 @@ fn d2_bin_env_overrides_path_lookup() {
 
     let bogus = dir.path().join("bogus-d2");
     env::set_var(D2_BIN_ENV, &bogus);
-    let err = Renderer::new()
+    let err = Renderer::cli()
         .render_str("a -> b", &dir.path().join("a.svg"), Format::Svg)
         .unwrap_err();
     match &err {
@@ -32,7 +32,7 @@ fn d2_bin_env_overrides_path_lookup() {
 
         env::set_var(D2_BIN_ENV, real);
         let out = dir.path().join("c.svg");
-        Renderer::new()
+        Renderer::cli()
             .render_str("a -> b", &out, Format::Svg)
             .unwrap();
         assert!(out.exists());

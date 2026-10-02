@@ -1,10 +1,13 @@
 //! Render [D2](https://d2lang.com) diagrams from Rust.
 //!
-//! The default backend runs the `d2` executable, so every D2 feature, layout
-//! engine and output format works exactly as on the command line. Its stderr
-//! is parsed into structured [`Diagnostic`]s, a successful render returns a
-//! typed [`RenderReport`], and rendered SVG is scanned for its size and the
-//! keys of every shape and connection ([`SvgInfo`]).
+//! By default diagrams are rendered in-process by a pure-Rust port of a
+//! subset of D2 ([`NativeBackend`], feature `native`): no `d2` binary, no
+//! subprocess. Enable feature `cli` to render through the `d2` executable
+//! instead ([`Renderer::cli`]), which supports the whole language, every
+//! layout engine and every output format. Either way stderr-style messages
+//! become structured [`Diagnostic`]s, a successful render returns a typed
+//! [`RenderReport`], and rendered SVG is scanned for its size and the keys
+//! of every shape and connection ([`SvgInfo`]).
 //!
 //! ```no_run
 //! use d2_render::{Format, Renderer, RenderOptions};
@@ -16,13 +19,15 @@
 //! # Ok::<(), d2_render::Error>(())
 //! ```
 //!
-//! Optional features: `native` (pure-Rust backend for a subset of D2),
-//! `tui` (ratatui widget), `web` (HTML embedding helpers) and `watch`
-//! (debounced re-render on change). See the README for each.
+//! Features: `native` (default), `cli` (the `d2` executable backend), `png`
+//! (PNG from the native backend via `resvg`), `tui` (ratatui widget), `web`
+//! (HTML embedding helpers) and `watch` (debounced re-render on change).
+//! See the README for each.
 
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod backend;
+#[cfg(feature = "cli")]
 mod cli;
 pub mod diagnostic;
 mod error;
@@ -42,6 +47,7 @@ pub mod watch;
 pub mod web;
 
 pub use backend::{Backend, BackendOutput};
+#[cfg(feature = "cli")]
 pub use cli::{CliBackend, D2_BIN_ENV};
 pub use diagnostic::{parse_stderr, Diagnostic, ParsedOutput, Severity};
 pub use error::{Error, Result};

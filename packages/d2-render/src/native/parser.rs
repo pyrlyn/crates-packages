@@ -67,6 +67,24 @@ pub struct Value {
     pub pos: Pos,
     /// Came from a `|...|` block string.
     pub block: bool,
+    /// The quote character, for quoted strings (`'...'` skips `${var}`
+    /// substitution, like in D2).
+    pub quote: Option<char>,
+    /// Items of an array value `[a; b]`.
+    pub items: Option<Vec<String>>,
+}
+
+impl Value {
+    /// A plain unquoted value.
+    pub fn plain(text: impl Into<String>, pos: Pos) -> Self {
+        Value {
+            text: text.into(),
+            pos,
+            block: false,
+            quote: None,
+            items: None,
+        }
+    }
 }
 
 /// One statement: `key: value { map }` or `a -> b -> c: label { map }`.
@@ -279,6 +297,14 @@ impl Parser {
             self.recover();
             return None;
         }
+        if self.starts_with("...$") {
+            self.err(
+                start,
+                "variable spreads are not supported by the native backend",
+            );
+            self.recover();
+            return None;
+        }
         if self.starts_with("...@") || self.peek() == Some('@') {
             self.err(start, "imports are not supported by the native backend");
             self.recover();
@@ -436,20 +462,26 @@ impl Parser {
             Some(q @ ('"' | '\'')) => {
                 let text = self.parse_quoted(q)?;
                 Some(Value {
-                    text,
-                    pos,
-                    block: false,
+                    quote: Some(q),
+                    ..Value::plain(text, pos)
                 })
             }
             Some('|') => self.parse_block(pos),
-            Some('[') => {
-                self.err(pos, "arrays are not supported by the native backend");
-                self.recover();
-                None
-            }
+            Some('[') => self.parse_array(pos),
             _ => {
                 let mut text = String::new();
                 while let Some(c) = self.peek() {
+                    // `${var}` substitutions are part of the value.
+                    if c == '$' && self.peek_at(1) == Some('{') {
+                        while let Some(c) = self.peek().filter(|c| *c != '\n') {
+                            text.push(c);
+                            self.bump();
+                            if c == '}' {
+                                break;
+                            }
+                        }
+                        continue;
+                    }
                     if matches!(c, '\n' | ';' | '{' | '}') {
                         break;
                     }
@@ -459,13 +491,47 @@ impl Parser {
                     text.push(c);
                     self.bump();
                 }
-                Some(Value {
-                    text: text.trim().to_string(),
-                    pos,
-                    block: false,
-                })
+                Some(Value::plain(text.trim(), pos))
             }
         }
+    }
+
+    /// `[a; b; "c d"]`.
+    fn parse_array(&mut self, pos: Pos) -> Option<Value> {
+        self.bump();
+        let mut items = Vec::new();
+        loop {
+            while matches!(self.peek(), Some(' ' | '\t' | '\r' | '\n' | ';')) {
+                self.bump();
+            }
+            match self.peek() {
+                None => {
+                    self.err(pos, "arrays must be terminated with ]");
+                    return None;
+                }
+                Some(']') => {
+                    self.bump();
+                    break;
+                }
+                Some(q @ ('"' | '\'')) => items.push(self.parse_quoted(q)?),
+                Some(_) => {
+                    let mut t = String::new();
+                    while let Some(c) = self.peek() {
+                        if matches!(c, ';' | ']' | '\n') {
+                            break;
+                        }
+                        t.push(c);
+                        self.bump();
+                    }
+                    items.push(t.trim().to_string());
+                }
+            }
+        }
+        Some(Value {
+            text: items.join("; "),
+            items: Some(items),
+            ..Value::plain("", pos)
+        })
     }
 
     /// `|md text|`, `||x||`, `|||...|||` (the tag is ignored).
@@ -514,9 +580,8 @@ impl Parser {
             .trim()
             .to_string();
         Some(Value {
-            text,
-            pos,
             block: true,
+            ..Value::plain(text, pos)
         })
     }
 }

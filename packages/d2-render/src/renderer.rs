@@ -6,13 +6,15 @@ use std::sync::Arc;
 use std::time::Instant;
 
 use crate::backend::Backend;
+#[cfg(feature = "cli")]
 use crate::cli::CliBackend;
 use crate::fresh::{self, Freshness, StaleOutput};
 use crate::report::RenderReport;
 use crate::svg::SvgInfo;
 use crate::{Error, Format, RenderOptions, Result};
 
-/// Renders D2 sources through a [`Backend`] (the `d2` CLI by default).
+/// Renders D2 sources through a [`Backend`]: the pure-Rust native backend
+/// by default, or the `d2` CLI with feature `cli`.
 ///
 /// Cheap to clone: the backend is shared.
 #[derive(Debug, Clone)]
@@ -21,6 +23,7 @@ pub struct Renderer {
     options: RenderOptions,
 }
 
+#[cfg(any(feature = "native", feature = "cli"))]
 impl Default for Renderer {
     fn default() -> Self {
         Self::new()
@@ -28,12 +31,28 @@ impl Default for Renderer {
 }
 
 impl Renderer {
-    /// CLI backend; the binary is `$D2_BIN` or `d2` on `$PATH`.
+    /// The default backend: [`crate::NativeBackend`] when feature `native`
+    /// is on (the default), otherwise the `d2` CLI (feature `cli`).
+    #[cfg(any(feature = "native", feature = "cli"))]
     pub fn new() -> Self {
+        #[cfg(feature = "native")]
+        {
+            Self::native()
+        }
+        #[cfg(not(feature = "native"))]
+        {
+            Self::cli()
+        }
+    }
+
+    /// CLI backend; the binary is `$D2_BIN` or `d2` on `$PATH` (feature `cli`).
+    #[cfg(feature = "cli")]
+    pub fn cli() -> Self {
         Self::with_backend(CliBackend::new())
     }
 
-    /// CLI backend with an explicit binary path.
+    /// CLI backend with an explicit binary path (feature `cli`).
+    #[cfg(feature = "cli")]
     pub fn with_binary(path: impl Into<PathBuf>) -> Self {
         Self::with_backend(CliBackend::with_binary(path))
     }
@@ -46,7 +65,7 @@ impl Renderer {
         }
     }
 
-    /// Pure-Rust backend (feature `native`).
+    /// Pure-Rust backend (feature `native`, on by default).
     #[cfg(feature = "native")]
     pub fn native() -> Self {
         Self::with_backend(crate::native::NativeBackend::new())

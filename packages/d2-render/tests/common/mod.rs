@@ -2,6 +2,7 @@
 
 use std::path::PathBuf;
 
+#[cfg(feature = "cli")]
 use d2_render::Renderer;
 
 pub fn fixture(name: &str) -> PathBuf {
@@ -12,8 +13,9 @@ pub fn fixture(name: &str) -> PathBuf {
 
 /// `Some(renderer)` when a real d2 binary is available, else prints why the
 /// calling test is skipped.
+#[cfg(feature = "cli")]
 pub fn real_d2(test: &str) -> Option<Renderer> {
-    let r = Renderer::new();
+    let r = Renderer::cli();
     match r.version() {
         Ok(_) => Some(r),
         Err(e) => {

@@ -1,25 +1,35 @@
-//! Render with the pure-Rust backend; no d2 binary needed.
+//! Render with the pure-Rust backend directly; no d2 binary needed.
 //!
-//! cargo run -p d2-render --features native --example native -- [input.d2] [output.svg]
+//! cargo run -p d2-render --example native -- [input.d2] [output.svg]
 
 use d2_render::native::render_svg;
 use d2_render::{RenderOptions, SvgInfo};
 
-const DEMO: &str = "direction: right
-cache: {shape: cylinder}
+const SHOWCASE: &str = "vars: {
+  d2-config: {theme-id: 3}
+  owner: Platform team
+}
+classes: {
+  store: {shape: cylinder; style.multiple: true}
+}
+direction: right
+title: Checkout (${owner}) {near: top-center; shape: text; style.font-size: 24}
+user: {shape: person}
 app: App {
   api -> worker: jobs
 }
-user: {shape: person}
-user -> app.api: HTTPS
+cache.class: store
+db.class: store
+user -> app.api: HTTPS {target-arrowhead.shape: diamond}
 app.worker -> cache
+app.worker -> db: {source-arrowhead: 1; target-arrowhead: {shape: cf-many}}
 ";
 
 fn main() -> Result<(), d2_render::Error> {
     let mut args = std::env::args().skip(1);
     let source = match args.next() {
         Some(path) => std::fs::read_to_string(path)?,
-        None => DEMO.to_string(),
+        None => SHOWCASE.to_string(),
     };
     let output = args
         .next()

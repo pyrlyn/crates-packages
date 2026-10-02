@@ -75,7 +75,9 @@ impl SvgInfo {
             }
             if tag.name == "g" {
                 if let Some(class) = tag.attr("class") {
-                    if let Some(key) = decode_key(class) {
+                    // `class="KEY name1 name2"`: D2 appends class names.
+                    let first = class.split_ascii_whitespace().next().unwrap_or("");
+                    if let Some(key) = decode_key(first) {
                         if !info.elements.iter().any(|e| e.key == key) {
                             let kind = classify(&key);
                             info.elements.push(SvgElement { key, kind });
@@ -413,7 +415,7 @@ mod tests {
             r#"<?xml version="1.0" encoding="utf-8"?><svg xmlns="http://www.w3.org/2000/svg" "#,
             r#"data-d2-version="v0.9.0" viewBox="0 0 315 728"><svg class="d2-1 d2-svg" "#,
             r#"width="315" height="728" viewBox="-91 -101 315 728"><style>.a{b:c}</style>"#,
-            r#"<g class="YQ=="><g class="shape"></g></g><g class="Z3JwLmM="></g>"#,
+            r#"<g class="YQ=="><g class="shape"></g></g><g class="Z3JwLmM= db hot"></g>"#,
             r#"<g class="KGEgLSZndDsgYilbMF0="></g><marker id="mk-1"/></svg></svg>"#
         );
         let info = SvgInfo::parse(svg);

@@ -7,7 +7,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | Crate | What it does |
 | --- | --- |
 | [`file-backup`](file-backup) | Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it |
-| [`d2-render`](packages/d2-render) | Render D2 diagrams to SVG/PNG via the d2 CLI, with structured diagnostics, freshness checks and an optional pure-Rust backend |
+| [`d2-render`](packages/d2-render) | Render D2 diagrams to SVG/PNG in pure Rust, with an optional d2 CLI backend, structured diagnostics and freshness checks |
 
 ## Commands
 
