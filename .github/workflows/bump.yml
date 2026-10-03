@@ -1,0 +1,53 @@
+# The only way to a release, and the only thing that creates a
+# `file-backup-v*` tag (pyrlyn/infra bump.yml). `release-plz update`
+# (release-plz.toml) writes the next version and the CHANGELOG.md section from
+# the conventional commits since the last tag; bump commits that as one
+# `chore: release file-backup-vX.Y.Z` commit, pushes it to a `release/bump-*`
+# branch and opens a pull request into main with RELEASE_PLZ_TOKEN, so the
+# pull request's own ci.yml runs. Once every required check is green, bump
+# rebase-merges it with GITHUB_TOKEN, reads back the commit that landed on
+# main, tags it, creates a draft release with the changelog section and
+# dispatches release.yml on the tag (gate, crates.io, publish the draft). Red
+# checks, a timeout or a failed merge close the pull request: no tag, no
+# release. `dry-run` stops after the checks. `level` is not used: release-plz
+# decides the next version from the commits.
+name: Bump and release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: open the version pull request and wait for its checks, then close it
+        default: false
+        type: boolean
+      release-untagged-head:
+        description: release the untagged version already on main (nothing to commit) as it stands
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  bump:
+    uses: pyrlyn/infra/.github/workflows/bump.yml@a4f93a2606a5dd8f697ad3d876440ab3e2eb4ae9 # main
+    permissions:
+      contents: write # the bump branch, the tag and the release
+      pull-requests: write # merge or close the bump pull request
+      actions: write # dispatch release.yml (and ci.yml for release-untagged-head)
+      checks: read # wait for the required checks
+      statuses: read
+      issues: write # notify-failure: a failed run opens a release-failure issue
+    with:
+      level: patch
+      dry-run: ${{ inputs.dry-run }}
+      release-untagged-head: ${{ inputs.release-untagged-head }}
+      release-plz-update: true
+      package: file-backup
+      tag-prefix: file-backup-v
+      commit-message: "chore: release file-backup-v{version}"
+      mise: false # no mise.toml; rust-toolchain.toml pins Rust
+      ci-workflows: ci.yml
+      release-workflows: release.yml
+    secrets:
+      BUMP_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN }}

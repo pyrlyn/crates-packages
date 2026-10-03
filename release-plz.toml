@@ -1,18 +1,18 @@
-# release-plz proposes the version bump and writes the changelog. Merging the
-# pull request it opens is what releases the crates, through
-# `.github/workflows/release.yml`.
+# release-plz writes the version and the changelog, and nothing else: bump.yml
+# (pyrlyn/infra bump.yml) runs `release-plz update` with this file, lands the
+# result through a pull request merged by rebase once the required checks are
+# green, and only then tags the landed commit and creates the release.
 #
-# Deliberately off is `git_release_enable`, because release.yml creates the
-# GitHub release (as a draft first, published last so the tag is created by a
-# completed release, never by a failed build). Tagging is release.yml's too,
-# for the same reason — the `release` command is never run here, only
-# `release-pr`.
+# No tags and no GitHub releases from release-plz (`git_tag_enable` and
+# `git_release_enable` off): bump is the only tagger, and the `release` /
+# `release-pr` commands are never run.
 #
 # Unlike ketch, the crates here ARE published to crates.io, so the registry
 # lookup stays on: it is the source of truth for what was released.
 
 [workspace]
 git_release_enable = false
+git_tag_enable = false
 
 # `file-backup` was never published to crates.io, so the registry lookup comes
 # back empty and release-plz concludes it can diff against nothing — same trap
