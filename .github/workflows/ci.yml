@@ -46,41 +46,23 @@ jobs:
           done
           exit $bad
 
-
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: Swatinem/rust-cache@v2
-
-      - name: Format
-        run: cargo fmt --all -- --check
-
-      - name: Lint
-        run: cargo clippy --workspace --all-targets --locked -- -D warnings
-
-      - name: Test
-        run: cargo test --workspace --locked
-
-      # Publishing happens only from release.yml on a version-bump merge (see
-      # below). Every other push just proves the crates are publish-ready, so
-      # a broken publish breaks here, not at release time.
-      - name: Publish dry-run
-        run: cargo publish --dry-run -p file-backup --locked
-
-  # file-backup is std-only and shared by ketch and rtok on all three
-  # platforms, so the unit tests run on each of them.
-  test-os:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: Swatinem/rust-cache@v2
-
-      - name: Test
-        run: cargo test --workspace --locked
+  # pyrlyn/infra ci-rust.yml: fmt once, then clippy, check and tests per target of its shared
+  # matrix (Linux x86_64 + aarch64, macOS aarch64, Windows x86_64; build-only macOS x86_64).
+  # file-backup is std-only and shared by ketch and rtok on all three platforms. The toolchain
+  # is rust-toolchain.toml's channel, pinned exactly (every job fails on another rustc).
+  rust:
+    uses: pyrlyn/infra/.github/workflows/ci-rust.yml@863d8960601216eec62d4aa78924f84ce61d72b9
+    permissions:
+      contents: read
+      actions: write # cancel-run on failure
+    with:
+      rust-version: "1.86.0" # rust-toolchain.toml channel = "1.86"
+      feature-args: ""
+      clippy-args: --locked
+      # Publishing happens only from release.yml on a version-bump merge. Every other push
+      # proves the crate is publish-ready, so a broken publish breaks here, not at release.
+      test-command: |
+        cargo test --workspace --locked
+        if [ "$TARGET" = x86_64-unknown-linux-gnu ]; then
+          cargo publish --dry-run -p file-backup --locked
+        fi
