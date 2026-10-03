@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Ivan Tugay
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Licensed under GPL-3.0 or later; see https://www.gnu.org/licenses/gpl-3.0.html
+
 //! Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it.
 //!
 //! Shared by ketch (`config reset`) and rtok (agent host setup). A missing

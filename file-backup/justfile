@@ -1,12 +1,12 @@
 # Everything CI would run.
-test: && dunnage
+test: && swarfr
     cargo test
 
 # Lossless cleanup of the workspace's cargo target dir (compress + dedupe); never deletes.
 # `..` because the workspace root (see ../Cargo.toml) is one level up from this crate,
 # and that's where cargo puts target/.
-dunnage:
+swarfr:
     #!/usr/bin/env sh
-    command -v dunnage >/dev/null || { echo "dunnage not found; install it with: ketch install dunnage"; exit 0; }
+    command -v swarfr >/dev/null || { echo "swarfr not found; install it with: ketch install swarfr"; exit 0; }
     [ -d ../target ] || exit 0
-    dunnage run ../target || test $? -eq 2
+    swarfr run ../target || test $? -eq 2
