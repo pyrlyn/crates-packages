@@ -1,6 +1,6 @@
 # crates-packages
 
-[![ci](https://github.com/listepo/crates-packages/actions/workflows/ci.yml/badge.svg)](https://github.com/listepo/crates-packages/actions/workflows/ci.yml) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=listepo_crates-packages&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=listepo_crates-packages) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=listepo_crates-packages&metric=coverage)](https://sonarcloud.io/component_measures?id=listepo_crates-packages&metric=coverage) [![Tests](https://img.shields.io/sonar/tests/listepo_crates-packages?server=https%3A%2F%2Fsonarcloud.io&compact_message)](https://sonarcloud.io/component_measures?id=listepo_crates-packages&metric=tests)
+[![ci](https://github.com/pyrlyn/crates-packages/actions/workflows/ci.yml/badge.svg)](https://github.com/pyrlyn/crates-packages/actions/workflows/ci.yml) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=listepo_crates-packages&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=listepo_crates-packages) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=listepo_crates-packages&metric=coverage)](https://sonarcloud.io/component_measures?id=listepo_crates-packages&metric=coverage) [![Tests](https://img.shields.io/sonar/tests/listepo_crates-packages?server=https%3A%2F%2Fsonarcloud.io&compact_message)](https://sonarcloud.io/component_measures?id=listepo_crates-packages&metric=tests)
 
 Small, focused Rust crates shared by `ketch` and `rtok`.
 
@@ -40,8 +40,8 @@ Two secrets must exist in the repo settings
 
 | Secret | Where to get it | Used by |
 | --- | --- | --- |
-| `CARGO_REGISTRY_TOKEN` | crates.io → Account Settings → API Tokens → New Token (needs `publish` scope; restrict it to the `file-backup` crate). Add with `gh secret set CARGO_REGISTRY_TOKEN --repo listepo/crates-packages` | `release.yml`, job `crates-io`: `cargo publish -p file-backup` |
-| `RELEASE_PLZ_TOKEN` | A fine-grained PAT (or GitHub App token) with **Contents** and **Pull requests** read/write on this repo — see https://release-plz.dev/docs/github/token. The default `GITHUB_TOKEN` cannot trigger `release.yml` from the release PR it opens, so without this the release PR would land without CI. Add with `gh secret set RELEASE_PLZ_TOKEN --repo listepo/crates-packages` | `release-plz.yml`: opens/updates the release PR |
+| `CARGO_REGISTRY_TOKEN` | crates.io → Account Settings → API Tokens → New Token (needs `publish` scope; restrict it to the `file-backup` crate). Add with `gh secret set CARGO_REGISTRY_TOKEN --repo pyrlyn/crates-packages` | `release.yml`, job `crates-io`: `cargo publish -p file-backup` |
+| `RELEASE_PLZ_TOKEN` | A fine-grained PAT (or GitHub App token) with **Contents** and **Pull requests** read/write on this repo — see https://release-plz.dev/docs/github/token. The default `GITHUB_TOKEN` cannot trigger `release.yml` from the release PR it opens, so without this the release PR would land without CI. Add with `gh secret set RELEASE_PLZ_TOKEN --repo pyrlyn/crates-packages` | `release-plz.yml`: opens/updates the release PR |
 
 Without `CARGO_REGISTRY_TOKEN` the release stops at the `crates-io` job with
 a loud error and publishes nothing — the tag is never created.
@@ -50,8 +50,5 @@ first step instead of opening a release PR that could never trigger CI.
 
 ## License
 
-You can use this project under **any** of the following licenses, at your choice:
-
-1. [GNU GPLv3](LICENSE): free for open source applications on any platform, including embedded systems.
-2. [Royalty-free License](LICENSE-ROYALTY-FREE.md): free for proprietary desktop, mobile, and web applications, as long as you disclose that your application uses this project. Embedded systems are not covered.
-3. [Commercial license](PRICING.md): for proprietary applications, including embedded systems, without the attribution requirement.
+Licensed under the [GNU General Public License v3.0 or later](LICENSE)
+(`GPL-3.0-or-later`).
