@@ -6,6 +6,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   CARGO_TERM_COLOR: always
 
@@ -46,41 +49,22 @@ jobs:
           done
           exit $bad
 
-
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: Swatinem/rust-cache@v2
-
-      - name: Format
-        run: cargo fmt --all -- --check
-
-      - name: Lint
-        run: cargo clippy --workspace --all-targets --locked -- -D warnings
-
-      - name: Test
-        run: cargo test --workspace --locked
-
-      # Publishing happens only from release.yml on a version-bump merge (see
-      # below). Every other push just proves the crates are publish-ready, so
-      # a broken publish breaks here, not at release time.
-      - name: Publish dry-run
-        run: cargo publish --dry-run -p file-backup --locked
-
-  # file-backup is std-only and shared by ketch and rtok on all three
-  # platforms, so the unit tests run on each of them.
-  test-os:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: Swatinem/rust-cache@v2
-
-      - name: Test
-        run: cargo test --workspace --locked
+  # Rust CI from the shared listepo/infra ci-rust.yml, pinned by commit: fmt once, then per
+  # target of its shared matrix clippy, check and the tests where the runner executes the
+  # target (Linux x86_64 and aarch64, macOS aarch64, Windows x86_64: file-backup is std-only and
+  # shared by ketch and rtok on all three platforms) or a build where it does not (macOS
+  # x86_64). Rust is the rust-toolchain.toml pin (no mise.toml here), checked against rustc.
+  rust:
+    uses: listepo/infra/.github/workflows/ci-rust.yml@189816ac5a375e18e0235044970efcbc40e3cabd
+    with:
+      # rust-toolchain.toml's `1.86`, as the full version rustc reports.
+      rust-version: "1.86.0"
+      clippy-args: --workspace --locked
+      # Publishing happens only from release.yml on a version-bump merge. Every other run just
+      # proves the crate is publish-ready, so a broken publish breaks here, not at release time.
+      test-command: |
+        cargo test --workspace --locked $FEATURE_ARGS
+        if [ "$TARGET" = x86_64-unknown-linux-gnu ]; then
+          cargo publish --dry-run -p file-backup --locked
+        fi
+      build-command: cargo build --workspace --all-targets --locked $FEATURE_ARGS --target "$TARGET"
