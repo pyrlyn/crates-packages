@@ -1,20 +1,18 @@
 name: release-plz
 
-# Every merge to main keeps one pull request up to date: the next version, and
-# the changelog entry for it, both derived from the conventional commits since
-# the last tag. Merging that pull request is the release — release.yml
-# publishes to crates.io and only then creates the tag.
+# Every merge to main keeps one pull request up to date through pyrlyn/infra's release-plz.yml:
+# the next version, and the changelog entry for it, both derived from the conventional commits
+# since the last tag. Merging that pull request is the release: release.yml runs on the push,
+# publishes to crates.io and only then creates the tag. Nothing here tags, publishes or
+# dispatches anything (`release-workflow: ""`).
 #
-# The flow is listepo/infra's release-plz.yml. Nothing here tags anything,
-# publishes anywhere or dispatches a workflow (`release-workflow: ""`): only
-# `release-pr` is run, and release.yml acts on the merge push itself. While
-# `file-backup-v<version>` is not tagged yet (a release in flight) the release
-# pull request is left alone.
+# While `file-backup-v<version>` has no tag yet (a release still being published) the release
+# pull request is left alone, so it is never written against a tag that does not exist.
 #
-# RELEASE_PLZ_TOKEN (fine-grained PAT or GitHub App token, contents and pull
-# requests read/write) is required: a pull request opened with GITHUB_TOKEN
-# starts no workflow, so it would be merged with no checks.
-# See https://release-plz.dev/docs/github/token
+# RELEASE_PLZ_TOKEN (fine-grained PAT or GitHub App token: contents and pull requests, write;
+# an organization secret) is required: a pull request opened with the default GITHUB_TOKEN
+# starts no workflow, so it would land on main, and publish, without CI.
+# https://release-plz.dev/docs/github/token
 on:
   push:
     branches: [main]
@@ -24,16 +22,15 @@ permissions:
 
 jobs:
   release-plz:
-    uses: listepo/infra/.github/workflows/release-plz.yml@189816ac5a375e18e0235044970efcbc40e3cabd
+    uses: pyrlyn/infra/.github/workflows/release-plz.yml@863d8960601216eec62d4aa78924f84ce61d72b9
     permissions:
-      contents: write
-      pull-requests: write
-      actions: write
+      contents: write # the release branch
+      pull-requests: write # the release pull request
+      actions: write # cancel-run on failure
     with:
-      tag-prefix: file-backup-v
       package: file-backup
-      release-workflow: ""
-      # No mise.toml here: cargo comes from rust-toolchain.toml via rustup.
-      mise: false
+      tag-prefix: file-backup-v
+      release-workflow: "" # release.yml runs on the push itself
+      mise: false # no mise.toml; cargo comes from rust-toolchain.toml
     secrets:
       RELEASE_PLZ_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN }}
