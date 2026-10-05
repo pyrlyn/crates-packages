@@ -10,6 +10,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | [`file-backup`](file-backup) | Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it |
 | [`git-changed-paths`](git-changed-paths) | Paths a git working tree changed relative to a base ref |
 | [`path-gates`](path-gates) | Map changed paths to named gates by glob rules from a TOML config |
+| [`scoped-check`](scoped-check) | Run only the check commands a change touches (binary) |
 
 ## Commands
 
