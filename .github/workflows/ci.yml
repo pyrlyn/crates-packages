@@ -56,7 +56,7 @@ jobs:
       contents: read
       actions: write # cancel-run on failure
     with:
-      rust-version: "1.86.0" # rust-toolchain.toml channel = "1.86"
+      rust-version: "1.99.0" # rust-toolchain.toml channel = "1.99.0"
       feature-args: ""
       clippy-args: --locked
       # Publishing happens only from release.yml on a version-bump merge. Every other push
