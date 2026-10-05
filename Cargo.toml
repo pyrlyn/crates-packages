@@ -1,5 +1,5 @@
 [workspace]
-members = ["file-backup"]
+members = ["change-preview", "file-backup"]
 resolver = "2"
 
 [workspace.package]

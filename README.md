@@ -6,6 +6,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 
 | Crate | What it does |
 | --- | --- |
+| [`change-preview`](change-preview) | Preview what a command would change: diff or `--stat` of edits, size and file count of removals, totals |
 | [`file-backup`](file-backup) | Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it |
 
 ## Commands
