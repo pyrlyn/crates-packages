@@ -7,6 +7,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | Crate | What it does |
 | --- | --- |
 | [`file-backup`](file-backup) | Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it |
+| [`git-changed-paths`](git-changed-paths) | Paths a git working tree changed relative to a base ref |
 
 ## Commands
 
