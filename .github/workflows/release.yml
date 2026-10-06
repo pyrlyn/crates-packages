@@ -1,7 +1,7 @@
 name: release
 
 # The release build. It never tags and never starts itself: bump.yml
-# (Actions -> Bump and release, pyrlyn/infra bump.yml) is the only way to a
+# (Actions -> Bump and release, pyrlyn/ci bump.yml) is the only way to a
 # release and the only thing that creates a `<package>-v*` tag. bump runs
 # `release-plz update`, opens a pull request with the one version commit,
 # rebase-merges it once every required check is green, tags the commit that
