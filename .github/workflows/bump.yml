@@ -1,5 +1,5 @@
 # The only way to a release, and the only thing that creates a
-# `file-backup-v*` tag (pyrlyn/infra bump.yml). `release-plz update`
+# `file-backup-v*` tag (pyrlyn/ci bump.yml). `release-plz update`
 # (release-plz.toml) writes the next version and the CHANGELOG.md section from
 # the conventional commits since the last tag; bump commits that as one
 # `chore: release file-backup-vX.Y.Z` commit, pushes it to a `release/bump-*`
@@ -30,7 +30,7 @@ permissions:
 
 jobs:
   bump:
-    uses: pyrlyn/infra/.github/workflows/bump.yml@a4f93a2606a5dd8f697ad3d876440ab3e2eb4ae9 # main
+    uses: pyrlyn/ci/.github/workflows/bump.yml@a4f93a2606a5dd8f697ad3d876440ab3e2eb4ae9 # main
     permissions:
       contents: write # the bump branch, the tag and the release
       pull-requests: write # merge or close the bump pull request

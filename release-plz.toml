@@ -1,5 +1,5 @@
 # release-plz writes the version and the changelog, and nothing else: bump.yml
-# (pyrlyn/infra bump.yml) runs `release-plz update` with this file, lands the
+# (pyrlyn/ci bump.yml) runs `release-plz update` with this file, lands the
 # result through a pull request merged by rebase once the required checks are
 # green, and only then tags the landed commit and creates the release.
 #

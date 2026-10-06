@@ -1,4 +1,4 @@
-# SonarCloud analysis (+ Rust LCOV coverage) through pyrlyn/infra's sonarcloud.yml. Every
+# SonarCloud analysis (+ Rust LCOV coverage) through pyrlyn/ci's sonarcloud.yml. Every
 # step skips with a notice when SONAR_TOKEN is not set; coverage and scan are soft-fail.
 # Rust comes from rust-toolchain.toml (no mise.toml here).
 name: sonarcloud
@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   sonarcloud:
-    uses: pyrlyn/infra/.github/workflows/sonarcloud.yml@863d8960601216eec62d4aa78924f84ce61d72b9
+    uses: pyrlyn/ci/.github/workflows/sonarcloud.yml@863d8960601216eec62d4aa78924f84ce61d72b9
     permissions:
       contents: read
       pull-requests: read
