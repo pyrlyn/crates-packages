@@ -2,7 +2,7 @@ name: release
 
 # The release build. It never tags and never starts itself: bump.yml
 # (Actions -> Bump and release, pyrlyn/ci bump.yml) is the only way to a
-# release and the only thing that creates a `file-backup-v*` tag. bump runs
+# release and the only thing that creates a `<package>-v*` tag. bump runs
 # `release-plz update`, opens a pull request with the one version commit,
 # rebase-merges it once every required check is green, tags the commit that
 # landed on main, creates a *draft* release with the CHANGELOG.md section and
@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag bump.yml created (file-backup-vX.Y.Z); run with --ref <tag>"
+        description: "Release tag bump.yml created (<package>-vX.Y.Z); run with --ref <tag>"
         required: true
         type: string
 
@@ -32,11 +32,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # The run must be on the tag bump created, and the tag must name the
-  # version in `file-backup/Cargo.toml`.
+  # The run must be on the tag bump created, and the tag must name a
+  # workspace crate and the version in its `Cargo.toml`.
   version:
     runs-on: ubuntu-latest
     outputs:
+      package: ${{ steps.decide.outputs.package }}
       version: ${{ steps.decide.outputs.version }}
       tag: ${{ steps.decide.outputs.tag }}
       publish: ${{ steps.decide.outputs.publish }}
@@ -49,14 +50,15 @@ jobs:
         env:
           TAG: ${{ inputs.tag }}
         run: |
+          package="${TAG%-v*}"
           version="$(cargo metadata --no-deps --format-version 1 \
-            | sed -n 's/.*"name":"file-backup","version":"\([^"]*\)".*/\1/p')"
+            | jq -r --arg p "$package" '.packages[] | select(.name == $p) | .version')"
           if [ -z "$version" ]; then
-            echo "could not read the version out of file-backup/Cargo.toml" >&2
+            echo "tag $TAG names no workspace crate ($package)" >&2
             exit 1
           fi
-          if [ "$TAG" != "file-backup-v$version" ]; then
-            echo "tag $TAG does not match file-backup/Cargo.toml ($version)" >&2
+          if [ "$TAG" != "$package-v$version" ]; then
+            echo "tag $TAG does not match $package/Cargo.toml ($version)" >&2
             exit 1
           fi
           ref="$(git ls-remote origin "refs/tags/${TAG}^{commit}" | awk '{print $1; exit}')"
@@ -66,6 +68,7 @@ jobs:
             exit 1
           fi
           {
+            echo "package=$package"
             echo "version=$version"
             echo "tag=$TAG"
             echo "ref=$ref"
@@ -102,9 +105,10 @@ jobs:
         with:
           ref: ${{ needs.version.outputs.ref }}
       - uses: Swatinem/rust-cache@v2
-      - name: Publish file-backup
+      - name: Publish the crate
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          PACKAGE: ${{ needs.version.outputs.package }}
         run: |
           if [ -z "$CARGO_REGISTRY_TOKEN" ]; then
             echo "CARGO_REGISTRY_TOKEN is not set: a crates.io API token." >&2
@@ -115,7 +119,7 @@ jobs:
           # the env var alone authenticates `cargo login`, not `cargo publish`.
           mkdir -p "$HOME/.cargo"
           printf '[registry]\ntoken = "%s"\n' "$CARGO_REGISTRY_TOKEN" > "$HOME/.cargo/credentials.toml"
-          cargo publish -p file-backup --locked > publish.log 2>&1
+          cargo publish -p "$PACKAGE" --locked > publish.log 2>&1
           status=$?
           set -e
           cat publish.log
