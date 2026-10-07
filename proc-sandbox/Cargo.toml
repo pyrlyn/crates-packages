@@ -2,7 +2,7 @@
 name = "proc-sandbox"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.98"
 description = "Confine a child process: Seatbelt on macOS, bubblewrap or Landlock plus seccomp on Linux, and a path guard for workspace roots"
 license = "GPL-3.0-or-later OR LicenseRef-Royalty-Free"
 repository = "https://github.com/pyrlyn/crates-packages"
