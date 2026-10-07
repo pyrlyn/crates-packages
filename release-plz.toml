@@ -7,26 +7,29 @@
 # `git_release_enable` off): bump is the only tagger, and the `release` /
 # `release-pr` commands are never run.
 #
-# Unlike ketch, the crates here ARE published to crates.io, so the registry
-# lookup stays on: it is the source of truth for what was released.
+# Unlike ketch, the crates here ARE published to crates.io. Each crate is
+# versioned and tagged on its own (`<crate>-v<version>`) and its changelog is
+# `<crate>/CHANGELOG.md`, release-plz's default location.
 
 [workspace]
 git_release_enable = false
 git_tag_enable = false
 
-# `file-backup` was never published to crates.io, so the registry lookup comes
-# back empty and release-plz concludes it can diff against nothing — same trap
-# ketch's release-plz.toml documents. Git tags are the only record that a
-# release happened, which release.yml now makes literally true: it creates the
-# tag by publishing the release.
+# A crate that was never published to crates.io makes the registry lookup come
+# back empty, so release-plz concludes it can diff against nothing — same trap
+# ketch's release-plz.toml documents. That is every crate's state before its
+# first release, and the trap would repeat per crate. Git tags are the only
+# record that a release happened, which bump.yml makes literally true: it
+# creates the tag once the version commit has landed.
 git_only = true
 
 # Below 1.0 release-plz sends a `feat:` to the patch. A new feature is worth
 # more than a third digit to someone deciding whether to upgrade, 1.0 or not.
 features_always_increment_minor = true
 
-# One tag per crate: release.yml derives `file-backup-v<version>` from
-# `file-backup/Cargo.toml`, and the changelog headings link to the release page.
+# One tag per crate, `<crate>-v<version>`: release.yml derives the crate to
+# publish from the tag, and the changelog headings link to the release page.
+# bump.yml's `tag-prefix` is the same `<crate>-v`; keep the two in step.
 git_tag_name = "{{ package }}-v{{ version }}"
 
 [changelog]
