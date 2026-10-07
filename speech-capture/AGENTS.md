@@ -6,14 +6,17 @@ conflicts with this file, ask the creator.
 ## What this crate is
 
 The audio front end for speech-to-text, shared by cox, runa and aulo: the default
-microphone (`Recorder`, and `InputDevice` for a streaming sink), audio file decode (`decode_audio`), resampling to 16 kHz
+microphone (`Recorder`, and `InputDevice` for a streaming sink), the default or a named speaker (`OutputDevice`, for a streaming source), audio file decode (`decode_audio`), resampling to 16 kHz
 mono, an energy VAD (`energy_vad`) and, behind the `whisper` cargo feature
 (off by default), a whisper.cpp `Transcriber`. Audio stays in memory; nothing
 here opens a socket or writes a file.
 
 Audio callbacks never block or allocate, and audio buffers are bounded. `src/input.rs`
-is the only place that opens a `cpal` stream (`InputDevice::find`, `start`, the
-`InputStream` guard); `Recorder` is built on it. Its callback, `deliver`, converts and
+and `src/output.rs` are the only places that open a `cpal` stream (`InputDevice::find`,
+`OutputDevice::find`, `start`, the `InputStream` and `OutputStream` guards), both on the
+stream thread in `src/stream.rs`; `Recorder` is built on `input.rs`. The output callback,
+`render`, asks the caller's source for mono samples in a stack buffer and writes them to
+every channel, so that source must be wait-free too. Its callback, `deliver`, converts and
 downmixes into a stack buffer and calls the caller's sink, so the sink must be
 wait-free too. `Recorder`'s sink is `feed` in `src/capture.rs`: it pushes into the
 producer half of a fixed-size `ringbuf` ring that `start` allocates before the stream

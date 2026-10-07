@@ -22,6 +22,15 @@ pub enum Error {
         "microphone: {0}; if the OS denied access, allow this program to use the microphone (macOS: System Settings > Privacy & Security > Microphone)"
     )]
     Stream(String),
+    /// The host has no default output device.
+    #[error("no speaker found; check that an output device is connected and selected")]
+    NoOutputDevice,
+    /// No output device has the requested name.
+    #[error("no output device named {0:?}")]
+    OutputDeviceNotFound(String),
+    /// The output stream could not be opened, started or run.
+    #[error("speaker: {0}")]
+    Output(String),
     /// An audio file could not be opened or read.
     #[error("io: {0}")]
     Io(#[from] std::io::Error),

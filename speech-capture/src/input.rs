@@ -7,16 +7,14 @@
 //! receives mono `f32` at that rate. The callback converts and downmixes into a
 //! small stack buffer and hands it to the sink: it takes no lock and makes no
 //! allocation of its own, so a sink that is wait-free keeps the whole callback
-//! wait-free. The stream lives on its own thread, because a `cpal` stream is
-//! not `Send` on every platform; the guard that stops it is.
-
-use std::sync::mpsc;
-use std::thread::JoinHandle;
+//! wait-free. The stream lives on its own thread (see `stream`), because a
+//! `cpal` stream is not `Send` on every platform; the guard that stops it is.
 
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{FromSample, Sample, SampleFormat, SizedSample};
 
 use crate::Error;
+use crate::stream::StreamThread;
 
 /// Frames converted per sink call. A stack buffer, so the callback never
 /// allocates whatever size the driver delivers.
@@ -94,31 +92,8 @@ impl InputDevice {
     /// into `sink`, called from the audio thread: it must not block or
     /// allocate. Dropping the returned guard stops the stream.
     pub fn start(self, sink: impl FnMut(&[f32]) + Send + 'static) -> Result<InputStream, Error> {
-        let (ready_tx, ready_rx) = mpsc::sync_channel(1);
-        let (stop_tx, stop_rx) = mpsc::channel::<()>();
-        let thread = std::thread::Builder::new()
-            .name("speech-capture".into())
-            .spawn(move || match self.open(sink) {
-                Ok(stream) => {
-                    let _ = ready_tx.send(Ok(()));
-                    // Returns once the sender is dropped: stop or cancel.
-                    let _ = stop_rx.recv();
-                    drop(stream);
-                }
-                Err(e) => {
-                    let _ = ready_tx.send(Err(e));
-                }
-            })
-            .map_err(|e| Error::Stream(e.to_string()))?;
-        // Built before the wait so a failed start still joins the thread.
-        let guard = InputStream {
-            stop: Some(stop_tx),
-            thread: Some(thread),
-        };
-        ready_rx
-            .recv()
-            .map_err(|_| Error::Stream("the capture thread ended".into()))??;
-        Ok(guard)
+        StreamThread::spawn("speech-capture", move || self.open(sink))
+            .map(|_thread| InputStream { _thread })
     }
 
     fn open(self, sink: impl FnMut(&[f32]) + Send + 'static) -> Result<cpal::Stream, Error> {
@@ -151,17 +126,7 @@ impl InputDevice {
 /// stream's thread, so no sink call happens after the drop returns.
 #[derive(Debug)]
 pub struct InputStream {
-    stop: Option<mpsc::Sender<()>>,
-    thread: Option<JoinHandle<()>>,
-}
-
-impl Drop for InputStream {
-    fn drop(&mut self) {
-        drop(self.stop.take());
-        if let Some(thread) = self.thread.take() {
-            let _ = thread.join();
-        }
-    }
+    _thread: StreamThread,
 }
 
 fn build<T>(

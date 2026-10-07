@@ -9,6 +9,9 @@ Everything between a sound source and a speech-to-text engine.
   `start(sink)` streams mono `f32` at `sample_rate_hz()` into a real-time sink
   and returns an `InputStream` that stops the stream when dropped. `Recorder`
   is built on it.
+- `OutputDevice::find(name)` is the same for a speaker: `start(source)` calls a
+  real-time source that fills mono `f32` at `sample_rate_hz()`, plays it on every
+  channel and returns an `OutputStream` that stops the stream when dropped.
 - `decode_audio(path)` reads wav, flac, ogg, mp3, aac or mp4 and returns mono
   16 kHz samples with an `AudioProbe` (codec, source rate, duration, SHA-256 of
   the PCM).
