@@ -26,7 +26,7 @@ use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 // Imported at the crate root so the `crate::http`/`crate::retry`/`crate::sse`
 // paths this wire used inside cox resolve unchanged.
-use llm_http::{http, retry, sse};
+use llm_http::{Transport, http, retry, sse};
 
 /// The API version this wire pins; Anthropic requires it on every request.
 pub const ANTHROPIC_VERSION: &str = "2023-06-01";
@@ -54,22 +54,6 @@ impl CacheTtl {
             CacheTtl::OneHour => "1h",
         }
     }
-}
-
-/// The connection settings every HTTP wire reads from its config section.
-///
-/// Mirrors cox's `cox_protocol::config::Transport`, which is not part of
-/// `llm-wire`; a caller copies its four fields across.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Transport {
-    /// Base URL of the API, e.g. `https://api.anthropic.com`.
-    pub base_url: String,
-    /// Name of the environment variable holding the API key.
-    pub api_key_env: String,
-    /// Idle-read timeout in seconds, between stream chunks.
-    pub timeout_s: u32,
-    /// Max retries for retryable errors.
-    pub max_retries: u32,
 }
 
 /// A configured Anthropic Messages client.

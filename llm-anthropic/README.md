@@ -16,7 +16,8 @@ The Anthropic Messages wire for LLM agent loops, over `llm-wire` and `llm-http`.
   OpenAPI spec in `schema/`.
 
 ```rust
-use llm_anthropic::{AnthropicProvider, CacheTtl, Transport};
+use llm_anthropic::{AnthropicProvider, CacheTtl};
+use llm_http::Transport;
 
 fn client() -> Result<AnthropicProvider, llm_wire::ProviderError> {
     let transport = Transport {

@@ -23,7 +23,8 @@
 //! stale index must never fail a turn.
 
 use llm_wire::{
-    Content, Effort, Message, ModelId, ProviderError, Request, Role, Thinking, ToolSpec,
+    Api, Capabilities, Content, Effort, Message, ModelId, ProviderError, Request, Role, Thinking,
+    ToolSpec, effort_for, supports_adaptive_thinking,
 };
 use serde_json::{Map, Value, json};
 
@@ -70,31 +71,6 @@ const SOURCE_ORDER: &[&str] = &["type", "media_type", "data"];
 const TOOL_ORDER: &[&str] = &["name", "description", "input_schema"];
 const CACHE_CONTROL_ORDER: &[&str] = &["type", "ttl"];
 
-/// Model-id prefixes that take Anthropic's adaptive `thinking` field.
-/// Older models only accept the `budget_tokens` form, which is a 400 on
-/// these — this wire never sends `budget_tokens`, so an unlisted model simply
-/// gets no `thinking` field. A plain prefix rule rather than a catalog row: a
-/// preview or custom variant that names no catalog row still matches by name.
-const ADAPTIVE_THINKING_PREFIXES: &[&str] = &[
-    "claude-opus-5",
-    "claude-sonnet-5",
-    "claude-haiku-5",
-    "claude-fable-5",
-    "claude-mythos-5",
-    "claude-opus-4-6",
-    "claude-opus-4-7",
-    "claude-opus-4-8",
-    "claude-sonnet-4-6",
-];
-
-/// Whether `model_id` takes Anthropic's adaptive `thinking` field (see
-/// [`ADAPTIVE_THINKING_PREFIXES`]).
-pub fn supports_adaptive_thinking(model_id: &str) -> bool {
-    ADAPTIVE_THINKING_PREFIXES
-        .iter()
-        .any(|p| model_id.starts_with(p))
-}
-
 /// The provider-level knobs [`build_body`] needs that are not part of the
 /// `Request` itself.
 #[derive(Debug, Clone, Copy)]
@@ -128,6 +104,13 @@ struct Raw {
 /// Fails only if a generated type refuses to serialize, which none of the
 /// ones used here can; the error exists so that is not a panic.
 pub fn build_body(req: &Request, cfg: BuildCfg<'_>) -> Result<Value, ProviderError> {
+    // The prefix rule, not a catalog row, says whether a model takes
+    // adaptive thinking, so no catalog is needed here.
+    let caps = Capabilities {
+        adaptive_thinking: Some(supports_adaptive_thinking(&req.model.0)),
+        ..Capabilities::default()
+    };
+    let sent = effort_for(Api::Anthropic, req.effort, &caps);
     let mut raw = Vec::new();
     let params = wire::CreateMessageParams {
         model: wire::Model(req.model.0.clone()),
@@ -149,7 +132,7 @@ pub fn build_body(req: &Request, cfg: BuildCfg<'_>) -> Result<Value, ProviderErr
         stream: Some(true),
         // Anthropic always sends `output_config.effort`.
         output_config: Some(wire::OutputConfig {
-            effort: Some(effort(req.effort)),
+            effort: sent.map(|s| effort(s.effort)),
             format: None,
         }),
         system: (!req.system.is_empty()).then(|| {
@@ -163,9 +146,7 @@ pub fn build_body(req: &Request, cfg: BuildCfg<'_>) -> Result<Value, ProviderErr
         tool_choice: (!req.tools.is_empty()).then_some(wire::ToolChoice::Auto {
             disable_parallel_tool_use: None,
         }),
-        // The prefix rule, not a catalog row, says whether a model takes
-        // adaptive thinking, so no catalog is needed here.
-        thinking: (req.thinking == Thinking::Adaptive && supports_adaptive_thinking(&req.model.0))
+        thinking: (req.thinking == Thinking::Adaptive && sent.is_some_and(|s| s.adaptive_thinking))
             .then_some(wire::ThinkingConfigParam::Adaptive { display: None }),
         stop_sequences: req.stop_sequences.clone(),
         cache_control: None,
@@ -682,16 +663,6 @@ mod tests {
         let body = build_body(&req, cfg(None));
         assert_eq!(body["output_config"]["effort"], "medium");
         assert!(body.get("thinking").is_none());
-    }
-
-    #[test]
-    fn supports_adaptive_thinking_matches_listed_prefixes_only() {
-        assert!(supports_adaptive_thinking("claude-sonnet-5"));
-        // Prefix match, not exact match: a dated/preview suffix still hits.
-        assert!(supports_adaptive_thinking("claude-sonnet-5-20260115"));
-        // Not listed: an older/unlisted family gets no `thinking` field.
-        assert!(!supports_adaptive_thinking("claude-haiku-4-5"));
-        assert!(!supports_adaptive_thinking("gpt-5.1"));
     }
 
     fn count_cache_control(v: &Value) -> usize {
