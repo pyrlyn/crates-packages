@@ -10,6 +10,8 @@ HTTP plumbing for LLM provider wires, on top of `reqwest`.
 - `retry`: `stream_with_retry` runs one provider attempt with exponential
   backoff and jitter, honours `retry-after`, and retries only before the
   first event reached the caller.
+- `Transport`: the section every wire's constructor takes (base URL, key env
+  var, idle timeout, max retries).
 - `sse`: `sse_stream` turns a byte stream into `(event, data)` frames and
   `parse_sse_str` parses a whole body for fixtures.
 
