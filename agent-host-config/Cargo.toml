@@ -8,11 +8,13 @@ license = "GPL-3.0-or-later OR LicenseRef-Royalty-Free"
 repository = "https://github.com/pyrlyn/crates-packages"
 keywords = ["mcp", "agents", "config", "json"]
 categories = ["development-tools", "config"]
-publish = false
+license-file = "../LICENSE-ROYALTY-FREE.md"
+readme = "README.md"
+exclude = ["AGENTS.md", "done.md", "ideas.md", "justfile", "plan.md", "roadmap.md", "todo.md", "toolchain.md"]
 
 [dependencies]
 anyhow = "1.0.104"
-file-backup = { path = "../file-backup" }
+file-backup = { path = "../file-backup", version = "0.1.1" }
 # `cst`: edit the host's file as text, so every byte outside our entry (formatting, comments,
 # key order, number spelling) survives. Same version as rtok's `rtok-mcp`.
 jsonc-parser = { version = "0.33.2", features = ["cst", "serde_json"] }

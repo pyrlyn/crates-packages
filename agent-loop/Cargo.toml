@@ -8,10 +8,12 @@ license = "GPL-3.0-or-later OR LicenseRef-Royalty-Free"
 repository = "https://github.com/pyrlyn/crates-packages"
 keywords = ["llm", "agent", "tools", "streaming"]
 categories = ["asynchronous"]
-publish = false
+license-file = "../LICENSE-ROYALTY-FREE.md"
+readme = "README.md"
+exclude = ["AGENTS.md", "done.md", "ideas.md", "justfile", "plan.md", "roadmap.md", "todo.md", "toolchain.md"]
 
 [dependencies]
-llm-wire = { path = "../llm-wire" }
+llm-wire = { path = "../llm-wire", version = "0.1.0" }
 async-trait = "0.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }
@@ -20,7 +22,7 @@ tokio = { version = "1", default-features = false, features = ["macros", "rt", "
 tokio-util = "0.7"
 
 [dev-dependencies]
-llm-wire = { path = "../llm-wire", features = ["test-util"] }
+llm-wire = { path = "../llm-wire", version = "0.1.0", features = ["test-util"] }
 pretty_assertions = "1.4"
 
 [lints.rust]

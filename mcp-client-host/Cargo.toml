@@ -8,7 +8,9 @@ license = "GPL-3.0-or-later OR LicenseRef-Royalty-Free"
 repository = "https://github.com/pyrlyn/crates-packages"
 keywords = ["mcp", "client", "oauth", "agent"]
 categories = ["development-tools"]
-publish = false
+license-file = "../LICENSE-ROYALTY-FREE.md"
+readme = "README.md"
+exclude = ["AGENTS.md", "done.md", "ideas.md", "justfile", "plan.md", "roadmap.md", "todo.md", "toolchain.md"]
 
 [lints.rust]
 unsafe_code = "forbid"

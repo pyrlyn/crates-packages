@@ -8,11 +8,13 @@ license = "GPL-3.0-or-later OR LicenseRef-Royalty-Free"
 repository = "https://github.com/pyrlyn/crates-packages"
 keywords = ["llm", "anthropic", "claude", "streaming", "sse"]
 categories = ["api-bindings", "asynchronous"]
-publish = false
+license-file = "../LICENSE-ROYALTY-FREE.md"
+readme = "README.md"
+exclude = ["AGENTS.md", "done.md", "ideas.md", "justfile", "plan.md", "roadmap.md", "todo.md", "toolchain.md"]
 
 [dependencies]
-llm-wire = { path = "../llm-wire" }
-llm-http = { path = "../llm-http" }
+llm-wire = { path = "../llm-wire", version = "0.1.0" }
+llm-http = { path = "../llm-http", version = "0.1.0" }
 async-trait = "0.1"
 futures = "0.3"
 # `json` sends the request body and `stream` reads the SSE response; llm-http

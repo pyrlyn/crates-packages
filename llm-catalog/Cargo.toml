@@ -8,10 +8,12 @@ license = "GPL-3.0-or-later OR LicenseRef-Royalty-Free"
 repository = "https://github.com/pyrlyn/crates-packages"
 keywords = ["llm", "agent", "models", "pricing"]
 categories = ["data-structures"]
-publish = false
+license-file = "../LICENSE-ROYALTY-FREE.md"
+readme = "README.md"
+exclude = ["AGENTS.md", "done.md", "ideas.md", "justfile", "plan.md", "roadmap.md", "todo.md", "toolchain.md"]
 
 [dependencies]
-llm-wire = { path = "../llm-wire" }
+llm-wire = { path = "../llm-wire", version = "0.1.0" }
 figment = { version = "0.10", default-features = false, features = ["toml"] }
 schemars = "1"
 serde = { version = "1.0", features = ["derive"] }
