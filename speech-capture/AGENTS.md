@@ -11,11 +11,12 @@ mono, an energy VAD (`energy_vad`) and, behind the `whisper` cargo feature
 (off by default), a whisper.cpp `Transcriber`. Audio stays in memory; nothing
 here opens a socket or writes a file.
 
-Audio callbacks must never block or allocate, and audio buffers are bounded. The
-`cpal` callback in `src/capture.rs` still locks a `Mutex` and allocates a `Vec`
-per callback (carried over from cox as is); the cap bounds the buffer, but
-the callback rule is not met yet. A change there should move to a fixed-size
-ring buffer with a counted overflow, not make the callback do more.
+Audio callbacks never block or allocate, and audio buffers are bounded. The
+`cpal` callback in `src/capture.rs` is the function `feed`: it downmixes into the
+producer half of a fixed-size `ringbuf` ring that `open` allocates before the
+stream starts, and counts the samples a full ring drops in an `AtomicU64`
+(`Recorder::overflowed_samples`). Keep it that way: no `Mutex`, no `Vec`, no
+logging and no `?` that allocates in the callback, and a test for any change.
 
 Tests must not need a microphone or a model: device-free steps are pure
 functions, and the model test is `#[ignore]`d.

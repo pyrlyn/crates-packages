@@ -14,6 +14,7 @@
 | Package | Where | Source | Why here |
 | --- | --- | --- | --- |
 | cpal | local | https://github.com/RustAudio/cpal | Microphone capture from the default input device |
+| ringbuf | local | https://github.com/agerasev/ringbuf | Fixed-size lock-free ring buffer between the audio callback and the recorder |
 | rubato | local | https://github.com/HEnquist/rubato | Resampling to 16 kHz |
 | symphonia | local | https://github.com/pdeljanov/Symphonia | Decoding mp3, aac, flac, ogg, mp4 and wav files |
 | hound | local | https://github.com/ruuda/hound | WAV read and write |

@@ -26,6 +26,7 @@ whisper = ["dep:whisper-rs"]
 [dependencies]
 cpal = "0.18"
 hound = "3.5"
+ringbuf = "0.5.2"
 rubato = "5"
 serde = { version = "1", features = ["derive"] }
 sha2 = "0.11"
