@@ -7,6 +7,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | Crate | What it does |
 | --- | --- |
 | [`agent-loop`](agent-loop) | Neutral agent turn state machine: provider stream, tool dispatch, approvals, interrupt (unpublished) |
+| [`agent-ext`](agent-ext) | Agent extension points: `SKILL.md` skills with a deferred skill tool, and Claude-Code-style shell hooks that fail open (not published yet) |
 | [`cargo-changed-packages`](cargo-changed-packages) | Workspace packages a set of changed paths affects, including reverse dependencies |
 | [`change-preview`](change-preview) | Preview what a command would change: diff or `--stat` of edits, size and file count of removals, totals |
 | [`config-schema`](config-schema) | Schema-checked TOML config: stale JSON Schema check, figment layering with per-key provenance, comment-preserving key edits (not published yet) |
