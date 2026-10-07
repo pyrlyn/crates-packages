@@ -96,6 +96,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "atomic-replace"
+version = "0.1.0"
+dependencies = [
+ "tempfile",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
