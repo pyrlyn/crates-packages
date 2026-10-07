@@ -28,7 +28,10 @@ async-trait = "0.1"
 # `auth` is the OAuth flow; the transports are added with the client.
 rmcp = { version = "3.2", features = ["client", "auth"] }
 serde_json = "1"
-tokio = { version = "1", features = ["io-util", "net", "rt", "time"] }
+tokio = { version = "1", features = ["io-util", "net", "rt", "sync", "time"] }
+# rmcp 3.x implements its HTTP client trait for reqwest 0.13; `elicit` uses its
+# re-exported `Url` to normalize a server's URL before a person is asked.
+reqwest = { version = "0.13", default-features = false, features = ["default-tls", "system-proxy"] }
 keyring = { version = "4", optional = true }
 
 [dev-dependencies]

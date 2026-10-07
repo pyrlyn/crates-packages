@@ -7,5 +7,6 @@
 pub mod auth;
 pub mod config;
 pub mod discovery;
+pub mod elicit;
 #[cfg(feature = "keyring")]
 pub mod keyring;
