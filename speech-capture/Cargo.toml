@@ -1,0 +1,40 @@
+[package]
+name = "speech-capture"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.98"
+description = "Microphone capture, audio file decode, resampling to 16 kHz mono and an energy VAD for speech-to-text, with optional whisper.cpp transcription"
+license = "GPL-3.0-or-later OR LicenseRef-Royalty-Free"
+repository = "https://github.com/pyrlyn/crates-packages"
+keywords = ["audio", "microphone", "resample", "vad", "whisper"]
+categories = ["multimedia::audio"]
+publish = false
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+
+[features]
+default = []
+# whisper.cpp is a heavy cmake C++ build, so it stays off unless asked for.
+whisper = ["dep:whisper-rs"]
+
+[dependencies]
+cpal = "0.18"
+hound = "3.5"
+rubato = "5"
+serde = { version = "1", features = ["derive"] }
+sha2 = "0.11"
+symphonia = { version = "0.6.1", features = ["mp3", "aac", "flac", "ogg", "pcm", "wav", "isomp4"] }
+thiserror = "2"
+tracing = "0.1"
+# `tracing_backend` routes whisper.cpp's and ggml's logging into `tracing`
+# instead of stderr, which would paint over a TUI.
+whisper-rs = { version = "0.16", optional = true, features = ["tracing_backend"] }
+
+[dev-dependencies]
+tempfile = "3"
