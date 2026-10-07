@@ -1,3 +1,3 @@
 # Roadmap
 
-- Publish `llm-catalog` to crates.io once `llm-wire` is published: drop `publish = false`, swap the `llm-wire` path dependency for its version, add it to `bump.yml` and the `cargo publish --dry-run` step in `ci.yml`, and list `llm-catalog/src` in `sonar-project.properties`. Unblocks T1.6.
+- Release `llm-catalog` 0.1.0 to crates.io with `bump.yml`, after `llm-wire` (the crate is publish-ready; the workflow lists it). Unblocks T1.6.

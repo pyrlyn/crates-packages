@@ -1,3 +1,3 @@
 # Roadmap
 
-- Publish `llm-wire-openai` to crates.io together with `llm-wire` and `llm-http`: drop `publish = false`, add it to `bump.yml` and the `cargo publish --dry-run` step in `ci.yml`, and list `llm-wire-openai/src` in `sonar-project.properties`. Unblocks T1.6.
+- Release `llm-wire-openai` 0.1.0 to crates.io with `bump.yml`, after `llm-wire` and `llm-http` (the crate is publish-ready; the workflow lists it). Unblocks T1.6.

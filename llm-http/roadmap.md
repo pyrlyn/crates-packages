@@ -1,3 +1,3 @@
 # Roadmap
 
-- Publish `llm-http` to crates.io together with `llm-wire`: drop `publish = false`, add it to `bump.yml` and the `cargo publish --dry-run` step in `ci.yml`, and list `llm-http/src` in `sonar-project.properties`. Unblocks T2.
+- Release `llm-http` 0.1.0 to crates.io with `bump.yml`, after `llm-wire` (the crate is publish-ready; the workflow lists it). Unblocks T2.
