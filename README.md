@@ -6,10 +6,16 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 
 | Crate | What it does |
 | --- | --- |
+| [`agent-loop`](agent-loop) | Neutral agent turn state machine: provider stream, tool dispatch, approvals, interrupt (unpublished) |
 | [`cargo-changed-packages`](cargo-changed-packages) | Workspace packages a set of changed paths affects, including reverse dependencies |
 | [`change-preview`](change-preview) | Preview what a command would change: diff or `--stat` of edits, size and file count of removals, totals |
 | [`file-backup`](file-backup) | Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it |
 | [`git-changed-paths`](git-changed-paths) | Paths a git working tree changed relative to a base ref |
+| [`llm-anthropic`](llm-anthropic) | The Anthropic Messages wire for LLM agent loops: request translation (cache breakpoints, thinking, effort), SSE stream parser, streaming client |
+| [`llm-catalog`](llm-catalog) | Model catalog for LLM agents: context windows, efforts, capabilities and prices merged from built-in rows, host config and a user price file (unpublished) |
+| [`llm-http`](llm-http) | HTTP plumbing for LLM provider wires: credential lookup, auth headers, error mapping, retry with backoff, SSE framing |
+| [`llm-openai`](llm-openai) | OpenAI Chat Completions and Responses wires, also for every OpenAI-compatible endpoint |
+| [`llm-wire`](llm-wire) | Provider contract and neutral request, event and tool types for LLM backends (unpublished) |
 | [`path-gates`](path-gates) | Map changed paths to named gates by glob rules from a TOML config |
 | [`scoped-check`](scoped-check) | Run only the check commands a change touches (binary) |
 

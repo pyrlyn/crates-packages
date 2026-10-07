@@ -1,5 +1,5 @@
 [workspace]
-members = ["cargo-changed-packages", "change-preview", "file-backup", "git-changed-paths", "path-gates", "scoped-check"]
+members = ["agent-loop", "cargo-changed-packages", "change-preview", "file-backup", "git-changed-paths", "llm-anthropic", "llm-catalog", "llm-http", "llm-openai", "llm-wire", "path-gates", "scoped-check"]
 resolver = "2"
 
 [workspace.package]
