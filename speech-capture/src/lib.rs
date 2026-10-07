@@ -3,7 +3,8 @@
 // Licensed under GPL-3.0 or later, or under the royalty-free licence in LICENSE-ROYALTY-FREE.md
 
 //! Everything between a sound source and a speech-to-text engine: the default
-//! microphone (`Recorder`), audio files (`decode_audio`), resampling to 16 kHz
+//! microphone (`Recorder`, or `InputDevice` for a streaming sink), audio files
+//! (`decode_audio`, feature `decode`, on by default), resampling to 16 kHz
 //! mono (`resample_to_16k`, `resample_mono`) and an energy voice-activity
 //! detector (`energy_vad`). The optional `whisper` feature adds `Transcriber`,
 //! whisper.cpp over a 16 kHz mono buffer. Audio stays in memory: nothing here
@@ -13,16 +14,20 @@
 #![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used, clippy::panic))]
 
 mod capture;
+#[cfg(feature = "decode")]
 mod decode;
 mod error;
+mod input;
 mod resample;
 #[cfg(feature = "whisper")]
 mod transcribe;
 mod vad;
 
-pub use capture::{Recorder, input_device};
+pub use capture::Recorder;
+#[cfg(feature = "decode")]
 pub use decode::{AudioProbe, DecodedAudio, decode_audio, pcm_sha256, pcm_to_wav_bytes};
 pub use error::Error;
+pub use input::{InputDevice, InputStream, input_device};
 pub use resample::{TARGET_SAMPLE_RATE, resample_mono, resample_to_16k};
 #[cfg(feature = "whisper")]
 pub use transcribe::{TranscribeError, Transcriber};

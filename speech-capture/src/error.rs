@@ -14,6 +14,9 @@ pub enum Error {
         "no microphone found; check that one is connected and that this program may use it (macOS: System Settings > Privacy & Security > Microphone)"
     )]
     NoInputDevice,
+    /// No input device has the requested name.
+    #[error("no input device named {0:?}")]
+    DeviceNotFound(String),
     /// The input stream could not be opened, started or run.
     #[error(
         "microphone: {0}; if the OS denied access, allow this program to use the microphone (macOS: System Settings > Privacy & Security > Microphone)"

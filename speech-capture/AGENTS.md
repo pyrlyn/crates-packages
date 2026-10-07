@@ -6,17 +6,23 @@ conflicts with this file, ask the creator.
 ## What this crate is
 
 The audio front end for speech-to-text, shared by cox, runa and aulo: the default
-microphone (`Recorder`), audio file decode (`decode_audio`), resampling to 16 kHz
+microphone (`Recorder`, and `InputDevice` for a streaming sink), audio file decode (`decode_audio`), resampling to 16 kHz
 mono, an energy VAD (`energy_vad`) and, behind the `whisper` cargo feature
 (off by default), a whisper.cpp `Transcriber`. Audio stays in memory; nothing
 here opens a socket or writes a file.
 
-Audio callbacks never block or allocate, and audio buffers are bounded. The
-`cpal` callback in `src/capture.rs` is the function `feed`: it downmixes into the
-producer half of a fixed-size `ringbuf` ring that `open` allocates before the
-stream starts, and counts the samples a full ring drops in an `AtomicU64`
+Audio callbacks never block or allocate, and audio buffers are bounded. `src/input.rs`
+is the only place that opens a `cpal` stream (`InputDevice::find`, `start`, the
+`InputStream` guard); `Recorder` is built on it. Its callback, `deliver`, converts and
+downmixes into a stack buffer and calls the caller's sink, so the sink must be
+wait-free too. `Recorder`'s sink is `feed` in `src/capture.rs`: it pushes into the
+producer half of a fixed-size `ringbuf` ring that `start` allocates before the stream
+starts, and counts the samples a full ring drops in an `AtomicU64`
 (`Recorder::overflowed_samples`). Keep it that way: no `Mutex`, no `Vec`, no
-logging and no `?` that allocates in the callback, and a test for any change.
+logging and no `?` that allocates in a callback or a sink, and a test for any change.
+
+The `decode` feature (default) gates file decode and its dependencies; a caller that
+only captures can turn default features off.
 
 Tests must not need a microphone or a model: device-free steps are pure
 functions, and the model test is `#[ignore]`d.
@@ -26,6 +32,7 @@ functions, and the model test is `#[ignore]`d.
 ```bash
 cargo test
 cargo clippy --all-targets
+cargo test --no-default-features   # capture and resample only
 cargo test --features whisper   # builds whisper.cpp: needs cmake and a C++ compiler
 cargo fmt
 ```

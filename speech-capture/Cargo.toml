@@ -19,18 +19,21 @@ expect_used = "deny"
 panic = "deny"
 
 [features]
-default = []
+default = ["decode"]
+# Audio file decode. Off for a caller that only needs the microphone, which
+# then builds without symphonia, hound, sha2 and serde.
+decode = ["dep:hound", "dep:serde", "dep:sha2", "dep:symphonia"]
 # whisper.cpp is a heavy cmake C++ build, so it stays off unless asked for.
 whisper = ["dep:whisper-rs"]
 
 [dependencies]
 cpal = "0.18"
-hound = "3.5"
+hound = { version = "3.5", optional = true }
 ringbuf = "0.5.2"
 rubato = "5"
-serde = { version = "1", features = ["derive"] }
-sha2 = "0.11"
-symphonia = { version = "0.6.1", features = ["mp3", "aac", "flac", "ogg", "pcm", "wav", "isomp4"] }
+serde = { version = "1", features = ["derive"], optional = true }
+sha2 = { version = "0.11", optional = true }
+symphonia = { version = "0.6.1", optional = true, features = ["mp3", "aac", "flac", "ogg", "pcm", "wav", "isomp4"] }
 thiserror = "2"
 tracing = "0.1"
 # `tracing_backend` routes whisper.cpp's and ggml's logging into `tracing`
