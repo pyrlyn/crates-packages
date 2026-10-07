@@ -20,6 +20,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | [`perm-rules`](perm-rules) | Permission rules for tool calls: `Tool(subject)` grammar, deny/allow/ask decision order, risk fallback |
 | [`proc-sandbox`](proc-sandbox) | Confine a child process: Seatbelt on macOS, bubblewrap or Landlock plus seccomp on Linux, and a path guard for workspace roots |
 | [`scoped-check`](scoped-check) | Run only the check commands a change touches (binary) |
+| [`shell-classify`](shell-classify) | Rate a bash command line `ReadOnly`/`Write`/`Exec`/`Destructive` and list the simple commands it runs (not published yet) |
 
 ## Commands
 
