@@ -3,51 +3,7 @@
 //! the provider stream already carries. Newtypes, so a mixed-up id is a
 //! compile error; each serializes as its ULID string.
 
-use std::fmt;
-use std::str::FromStr;
-
-use serde::{Deserialize, Serialize};
-use ulid::Ulid;
-
-/// Declares a ULID newtype with `new`, `Display`, `FromStr` and
-/// string-shaped serde, so both ids behave the same.
-macro_rules! ulid_id {
-    ($name:ident, $doc:literal) => {
-        #[doc = $doc]
-        #[derive(
-            Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
-        )]
-        #[serde(transparent)]
-        pub struct $name(Ulid);
-
-        impl $name {
-            /// Generates a fresh, time-sortable id.
-            pub fn new() -> Self {
-                Self(Ulid::generate())
-            }
-        }
-
-        impl Default for $name {
-            fn default() -> Self {
-                Self::new()
-            }
-        }
-
-        impl fmt::Display for $name {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                fmt::Display::fmt(&self.0, f)
-            }
-        }
-
-        impl FromStr for $name {
-            type Err = ulid::DecodeError;
-
-            fn from_str(s: &str) -> Result<Self, Self::Err> {
-                Ok(Self(Ulid::from_str(s)?))
-            }
-        }
-    };
-}
+use llm_wire::ulid_id;
 
 ulid_id!(
     TurnId,

@@ -3,59 +3,85 @@
 //! newtype instead of a bare `String`, so a mixed-up id is a compile error,
 //! and serializes as its ULID string form.
 
-use std::borrow::Cow;
-use std::fmt;
-use std::str::FromStr;
+/// What [`ulid_id!`] expands to, re-exported so a crate that calls the macro
+/// needs no `ulid`, `serde` or `schemars` dependency of its own.
+#[doc(hidden)]
+pub mod __private {
+    pub use schemars;
+    pub use serde;
+    pub use ulid;
+}
 
-use schemars::{JsonSchema, Schema, json_schema};
-use serde::{Deserialize, Serialize};
-use ulid::Ulid;
-
-/// Declares a ULID newtype with `new`, `Display`, `FromStr` and
-/// string-shaped serde, so every id gets identical behaviour.
+/// Declares a ULID newtype with `new`, `Display`, `FromStr`, string-shaped
+/// serde and a JSON Schema, so every id gets identical behaviour. Exported so
+/// a crate with ids of its own (a turn, a transcript item) shares this one
+/// definition instead of copying it.
+#[macro_export]
 macro_rules! ulid_id {
     ($name:ident, $doc:literal) => {
         #[doc = $doc]
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-        #[serde(transparent)]
-        pub struct $name(Ulid);
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+        pub struct $name($crate::ids::__private::ulid::Ulid);
 
         impl $name {
             /// Generates a fresh, time-sortable id.
             pub fn new() -> Self {
                 // ulid 3.x renamed `Ulid::new()` to `Ulid::generate()`; the
                 // wrapper keeps its name so callers do not churn with the dep.
-                Self(Ulid::generate())
+                Self($crate::ids::__private::ulid::Ulid::generate())
             }
         }
 
-        impl Default for $name {
+        impl ::std::default::Default for $name {
             fn default() -> Self {
                 Self::new()
             }
         }
 
-        impl fmt::Display for $name {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                fmt::Display::fmt(&self.0, f)
+        impl ::std::fmt::Display for $name {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                ::std::fmt::Display::fmt(&self.0, f)
             }
         }
 
-        impl FromStr for $name {
-            type Err = ulid::DecodeError;
+        impl ::std::str::FromStr for $name {
+            type Err = $crate::ids::__private::ulid::DecodeError;
 
-            fn from_str(s: &str) -> Result<Self, Self::Err> {
-                Ok(Self(Ulid::from_str(s)?))
+            fn from_str(s: &str) -> ::std::result::Result<Self, Self::Err> {
+                Ok(Self(
+                    <$crate::ids::__private::ulid::Ulid as ::std::str::FromStr>::from_str(s)?,
+                ))
             }
         }
 
-        impl JsonSchema for $name {
-            fn schema_name() -> Cow<'static, str> {
-                Cow::Borrowed(stringify!($name))
+        // Written out instead of `#[serde(transparent)]`: the derive would
+        // name `serde` in the calling crate, which may not depend on it.
+        impl $crate::ids::__private::serde::Serialize for $name {
+            fn serialize<S: $crate::ids::__private::serde::Serializer>(
+                &self,
+                serializer: S,
+            ) -> ::std::result::Result<S::Ok, S::Error> {
+                $crate::ids::__private::serde::Serialize::serialize(&self.0, serializer)
+            }
+        }
+
+        impl<'de> $crate::ids::__private::serde::Deserialize<'de> for $name {
+            fn deserialize<D: $crate::ids::__private::serde::Deserializer<'de>>(
+                deserializer: D,
+            ) -> ::std::result::Result<Self, D::Error> {
+                $crate::ids::__private::serde::Deserialize::deserialize(deserializer).map(Self)
+            }
+        }
+
+        impl $crate::ids::__private::schemars::JsonSchema for $name {
+            fn schema_name() -> ::std::borrow::Cow<'static, str> {
+                ::std::borrow::Cow::Borrowed(stringify!($name))
             }
 
-            fn json_schema(_gen: &mut schemars::SchemaGenerator) -> Schema {
-                json_schema!({
+            fn json_schema(
+                _gen: &mut $crate::ids::__private::schemars::SchemaGenerator,
+            ) -> $crate::ids::__private::schemars::Schema {
+                $crate::ids::__private::schemars::json_schema!({
                     "type": "string",
                     "description": concat!(stringify!($name), ": a 26-character Crockford-base32 ULID."),
                     "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"

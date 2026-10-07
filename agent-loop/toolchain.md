@@ -18,6 +18,5 @@
 | thiserror | local | https://github.com/dtolnay/thiserror | `LoopError` |
 | tokio | local | https://github.com/tokio-rs/tokio | Channels, `JoinSet` for parallel calls, `select!`, approval timeout |
 | tokio-util | local | https://github.com/tokio-rs/tokio | `CancellationToken` for interrupts |
-| ulid | local | https://github.com/dylanhart/ulid-rs | `TurnId` and `ItemId` |
 | llm-wire (`test-util`) | local, dev | https://github.com/pyrlyn/crates-packages | Scenario parsing for the scripted test provider |
 | pretty_assertions | local, dev | https://github.com/rust-pretty-assertions/rust-pretty-assertions | Readable test diffs |
