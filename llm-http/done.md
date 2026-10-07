@@ -6,4 +6,4 @@ Copied from cox's `cox-provider-http` so aulo can share the plumbing; cox is unt
 
 ### T3. One Transport for the wires
 
-Aulo follow-up to T1.3 and T1.4. `Transport` (base URL, key env var, idle timeout, max retries) is defined here and used by `llm-openai` and `llm-anthropic`, which each kept a private copy; `llm_openai::config::Transport` and `llm_anthropic::Transport` are gone. `llm-wire` stays free of transport settings. Check: `cargo test --workspace --all-features`, clippy and `cargo fmt --all --check` green.
+Aulo follow-up to T1.3 and T1.4. `Transport` (base URL, key env var, idle timeout, max retries) is defined here and used by `llm-wire-openai` and `llm-wire-anthropic`, which each kept a private copy; `llm_wire_openai::config::Transport` and `llm_wire_anthropic::Transport` are gone. `llm-wire` stays free of transport settings. Check: `cargo test --workspace --all-features`, clippy and `cargo fmt --all --check` green.

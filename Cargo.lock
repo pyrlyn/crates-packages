@@ -2239,24 +2239,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "47d9d19d1d6efa0109d2f65ff4c85cddd50bd572e5a00127ab10987290bcefae"
 
 [[package]]
-name = "llm-anthropic"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "futures",
- "insta",
- "llm-http",
- "llm-wire",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "tokio",
- "tokio-util",
- "typify",
- "wiremock",
-]
-
-[[package]]
 name = "llm-catalog"
 version = "0.1.0"
 dependencies = [
@@ -2284,24 +2266,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "llm-openai"
-version = "0.1.0"
-dependencies = [
- "async-openai",
- "async-trait",
- "futures",
- "insta",
- "llm-http",
- "llm-wire",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "tokio",
- "tokio-util",
- "wiremock",
-]
-
-[[package]]
 name = "llm-wire"
 version = "0.1.0"
 dependencies = [
@@ -2317,6 +2281,42 @@ dependencies = [
  "tokio",
  "tokio-util",
  "ulid",
+]
+
+[[package]]
+name = "llm-wire-anthropic"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "futures",
+ "insta",
+ "llm-http",
+ "llm-wire",
+ "reqwest 0.12.28",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-util",
+ "typify",
+ "wiremock",
+]
+
+[[package]]
+name = "llm-wire-openai"
+version = "0.1.0"
+dependencies = [
+ "async-openai",
+ "async-trait",
+ "futures",
+ "insta",
+ "llm-http",
+ "llm-wire",
+ "reqwest 0.12.28",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-util",
+ "wiremock",
 ]
 
 [[package]]
@@ -2347,7 +2347,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dae608c151f68243f2b000364e1f7b186d9c29845f7d2d85bd31b9ad77ad552b"
 
 [[package]]
-name = "mcp-host"
+name = "mcp-client-host"
 version = "0.1.0"
 dependencies = [
  "async-trait",
