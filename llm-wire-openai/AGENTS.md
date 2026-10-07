@@ -27,9 +27,8 @@ Gemini's compatibility endpoint, xAI, runa). Extracted from cox's
 - **No `unwrap`, `expect` or `panic!` outside tests** (clippy denies them), and
   no `unsafe` (forbidden).
 - **Doc comments on every public item** (`missing_docs` is on).
-- **Not published yet** (`publish = false`): cox depends on a published crate
-  only, because a path dependency breaks cox CI. It depends on `llm-wire` and
-  `llm-http` by path for the same reason, so all three are published together.
+- **Published to crates.io** from this repository: a dependency on a sibling crate
+  carries both `path` and `version`, so a release publishes the siblings first.
 
 ## Commands
 

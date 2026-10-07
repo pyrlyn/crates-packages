@@ -20,8 +20,7 @@ derives only: no wire format, no I/O.
 - **Doc comments on every public item** (`missing_docs` is on).
 - **`test-util` stays optional.** The scenario parser and cassette helpers sit
   behind the feature so a production build carries no TOML and no hashing.
-- **Not published yet** (`publish = false`): cox depends on a published crate
-  only, because a path dependency breaks cox CI.
+- Published to crates.io from this repository.
 
 ## Commands
 

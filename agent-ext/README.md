@@ -23,4 +23,4 @@ let found = discover(&dirs);
 let prompt_part = index(&found.skills);
 ```
 
-Extracted from cox's `cox-ext`. The crate is not published yet (`publish = false`).
+Extracted from cox's `cox-ext`.

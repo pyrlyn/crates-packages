@@ -26,9 +26,8 @@ provider stream, and generic SSE framing. Extracted from cox's
 - **No `unwrap`, `expect` or `panic!` outside tests** (clippy denies them), and
   no `unsafe` (forbidden), so tests inject the environment instead of setting it.
 - **Doc comments on every public item** (`missing_docs` is on).
-- **Not published yet** (`publish = false`): cox depends on a published crate
-  only, because a path dependency breaks cox CI. It depends on `llm-wire` by
-  path for the same reason, so both are published together.
+- **Published to crates.io** from this repository: a dependency on a sibling crate
+  carries both `path` and `version`, so a release publishes the siblings first.
 
 ## Commands
 

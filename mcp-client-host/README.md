@@ -17,5 +17,5 @@ The client half of an MCP host over [`rmcp`](https://crates.io/crates/rmcp) 3.x.
 - **Tools.** Each server tool is an `McpTool` named `mcp__<server>__<tool>`,
   deferred by default, with its risk lowered only by `readOnlyHint`.
 
-The crate is not published yet (`publish = false`); the licence is
-`GPL-3.0-or-later OR LicenseRef-Royalty-Free`.
+The licence is `GPL-3.0-or-later OR LicenseRef-Royalty-Free`
+(see `LICENSE-ROYALTY-FREE.md`).

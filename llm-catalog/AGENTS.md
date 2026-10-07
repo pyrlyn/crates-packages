@@ -28,9 +28,8 @@ parsing an embedded or caller-supplied string.
   from cox's vendor pipeline (models.dev). Refresh them from cox, never by hand.
 - **No `unwrap`, `expect` or `panic!` outside tests** (clippy denies them).
 - **Doc comments on every public item** (`missing_docs` is on).
-- **Not published yet** (`publish = false`): cox depends on a published crate
-  only, because a path dependency breaks cox CI. The path dependency on
-  `llm-wire` becomes a version requirement when both are published.
+- **Published to crates.io** from this repository: a dependency on a sibling crate
+  carries both `path` and `version`, so a release publishes the siblings first.
 
 ## Commands
 

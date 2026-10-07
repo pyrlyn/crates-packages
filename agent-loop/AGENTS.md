@@ -65,8 +65,8 @@ hooks, sandbox, archive and dedup, telemetry spans, the full `Event` enum.
 - **No tool runs before an allow**, and none starts after an interrupt.
 - **No `unwrap`, `expect` or `panic!` outside tests** (clippy denies them).
 - **Doc comments on every public item** (`missing_docs` is on).
-- **Not published yet** (`publish = false`): cox depends on published crates
-  only, because a path dependency breaks cox CI.
+- **Published to crates.io** from this repository: a dependency on a sibling crate
+  carries both `path` and `version`, so a release publishes the siblings first.
 
 ## Commands
 

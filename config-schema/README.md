@@ -30,8 +30,6 @@ edit.apply()?; // atomic write
 | `env` | `EnvLayer`: `PREFIX_*` variables matched against the defaults' key tree, so `APP_PROXY_OPENAI_UPSTREAM` is `proxy.openai_upstream`; array keys take comma lists |
 | `edit` | `plan_edit::<T>` (own file: reveals commented defaults, validates), `plan_edit_foreign` (only the named keys change), `read_entry` (check only our entry in a foreign file), `parse_value`, `value_from_json`, atomic `Edit::apply` |
 
-Not published yet; see `plan.md`.
-
 ## License
 
 `GPL-3.0-or-later OR LicenseRef-Royalty-Free` (see the repository's `LICENSE` and `LICENSE-ROYALTY-FREE.md`).

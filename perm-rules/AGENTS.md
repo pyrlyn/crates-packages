@@ -17,7 +17,7 @@ no I/O, no host types, no serde.
   `Grammar::alias` and `Grammar::path_tool`; do not hard-code a host's tools.
 - A malformed rule is a `RuleError`, never a skipped guard.
 - No `unwrap`, `expect` or `panic` outside tests (clippy-denied).
-- `publish = false` until cox adopts the crate (see `plan.md`).
+- Published to crates.io from this repository.
 
 ## Commands
 

@@ -34,9 +34,8 @@ implements `llm_wire::Provider` over `llm-http`. Extracted from cox's
   no `unsafe` (forbidden), so tests inject the environment instead of setting it.
 - **Doc comments on every public item** (`missing_docs` is on; only the
   generated module is exempt).
-- **Not published yet** (`publish = false`): cox depends on a published crate
-  only, because a path dependency breaks cox CI. It depends on `llm-wire` and
-  `llm-http` by path for the same reason, so all three are published together.
+- **Published to crates.io** from this repository: a dependency on a sibling crate
+  carries both `path` and `version`, so a release publishes the siblings first.
 
 ## Commands
 

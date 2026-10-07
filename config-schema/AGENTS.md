@@ -24,7 +24,7 @@ types, its layer order and its guards.
   variables with `EnvLayer::with_vars`.
 - Every error that comes from a file names the file.
 - `figment`, `toml_edit` and `schemars` stay behind this crate's API.
-- The crate is `publish = false` until an app adopts it (see `plan.md`).
+- Published to crates.io from this repository.
 
 ## Commands
 

@@ -32,5 +32,5 @@ assert!(!energy_vad(&pcm, TARGET_SAMPLE_RATE).is_empty());
 ```
 
 Merged from cox's `cox-voice` capture and runa's `runa-media` decode, resample
-and VAD. The crate is not published yet (`publish = false`). On Linux, building
+and VAD. On Linux, building
 needs the ALSA headers (`libasound2-dev`).

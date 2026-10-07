@@ -10,5 +10,3 @@ let row = catalog.get("claude-sonnet-5");
 ```
 
 The crate does no I/O beyond parsing an embedded or caller-supplied string. `models.toml` and `prices.toml` are embedded; JSON Schemas for both are in `schema/`.
-
-Not published yet.

@@ -38,5 +38,5 @@ let cmd = sandbox::command(&policy, &ws, &ws, Path::new("/bin/sh"), "ls")?;
 # Ok::<(), std::io::Error>(())
 ```
 
-Not published yet; the licence is `GPL-3.0-or-later OR LicenseRef-Royalty-Free`
-(see `LICENSE-ROYALTY-FREE.md` at the repository root).
+The licence is `GPL-3.0-or-later OR LicenseRef-Royalty-Free`
+(see `LICENSE-ROYALTY-FREE.md`).
