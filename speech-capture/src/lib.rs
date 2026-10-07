@@ -13,11 +13,17 @@
 #![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used, clippy::panic))]
 
 mod capture;
+mod decode;
 mod error;
 mod resample;
+#[cfg(feature = "whisper")]
+mod transcribe;
 mod vad;
 
 pub use capture::{Recorder, input_device};
+pub use decode::{AudioProbe, DecodedAudio, decode_audio, pcm_sha256, pcm_to_wav_bytes};
 pub use error::Error;
 pub use resample::{TARGET_SAMPLE_RATE, resample_mono, resample_to_16k};
+#[cfg(feature = "whisper")]
+pub use transcribe::{TranscribeError, Transcriber};
 pub use vad::{VadSpan, energy_vad};

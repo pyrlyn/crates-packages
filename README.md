@@ -12,6 +12,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | [`git-changed-paths`](git-changed-paths) | Paths a git working tree changed relative to a base ref |
 | [`path-gates`](path-gates) | Map changed paths to named gates by glob rules from a TOML config |
 | [`scoped-check`](scoped-check) | Run only the check commands a change touches (binary) |
+| [`speech-capture`](speech-capture) | Microphone capture, audio decode, 16 kHz resampling and an energy VAD for speech-to-text, optional whisper.cpp (not published yet) |
 
 ## Commands
 

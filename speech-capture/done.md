@@ -1,0 +1,5 @@
+# speech-capture — completed tasks
+
+### T1. Extract microphone capture and resampling from cox and runa
+
+Merged cox's `crates/cox-voice` capture (aulo task T1.13) with runa's `crates/runa-media` decode, resample and energy VAD: `Recorder` and `input_device` (cpal default device, downmix, FFT resample to 16 kHz), `decode_audio` with `AudioProbe` and `pcm_sha256` (hound for wav, symphonia for the rest), `resample_mono` (sinc), `pcm_to_wav_bytes` and `energy_vad`. whisper.cpp transcription (`Transcriber`, `TranscribeError`) sits behind the `whisper` feature, off by default. Types are neutral (one `Error` enum), with no cox or runa dependency. Behaviour is unchanged except that a failed resample at `Recorder::stop` is `Error::Resample` instead of cox's `VoiceError::Stream`, error texts say "this program" instead of "this terminal", and the runa WAV fixtures became tone files the tests write themselves. Left in runa: `wav_base64`, model download, ASR engine, WER, video and preprocessing. Check: `cargo test -p speech-capture`, `cargo clippy -p speech-capture --all-targets -- -D warnings` green.
