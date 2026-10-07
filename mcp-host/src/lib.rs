@@ -4,5 +4,8 @@
 //! untrusted network peers: a server that will not start is a notice, never
 //! an error, and nothing here depends on an application crate.
 
+pub mod auth;
 pub mod config;
 pub mod discovery;
+#[cfg(feature = "keyring")]
+pub mod keyring;
