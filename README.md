@@ -10,6 +10,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | [`change-preview`](change-preview) | Preview what a command would change: diff or `--stat` of edits, size and file count of removals, totals |
 | [`file-backup`](file-backup) | Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it |
 | [`git-changed-paths`](git-changed-paths) | Paths a git working tree changed relative to a base ref |
+| [`mcp-host`](mcp-host) | MCP client host over rmcp: `.mcp.json` discovery, fail-open connect, OAuth with an injectable token store, elicitation, deferred tools |
 | [`path-gates`](path-gates) | Map changed paths to named gates by glob rules from a TOML config |
 | [`scoped-check`](scoped-check) | Run only the check commands a change touches (binary) |
 
