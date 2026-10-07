@@ -2,7 +2,7 @@
 name = "shell-classify"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.98"
 description = "Classify a bash command line by risk (read-only, write, exec, destructive) and list the simple commands it runs, with tree-sitter"
 license = "GPL-3.0-or-later OR LicenseRef-Royalty-Free"
 repository = "https://github.com/pyrlyn/crates-packages"
