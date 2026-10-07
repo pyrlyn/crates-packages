@@ -7,7 +7,7 @@
     "model": {
       "type": "array",
       "items": {
-        "$ref": "#/$defs/ModelEntry"
+        "$ref": "#/$defs/ProviderModel"
       }
     }
   },
@@ -16,7 +16,7 @@
     "model"
   ],
   "$defs": {
-    "ModelEntry": {
+    "ProviderModel": {
       "description": "One configured model: what a host's `[providers.*].models` entry (or a\nbuilt-in `models.toml` row) says about a model id. The host fills these\nfrom its own config, so this crate depends on no config type of the\nhost's. An empty `efforts` means \"any\".",
       "type": "object",
       "properties": {
@@ -33,7 +33,7 @@
           ]
         },
         "context_window": {
-          "description": "Context window in tokens.",
+          "description": "Context window in tokens; `0` means not declared.",
           "type": "integer",
           "format": "uint32",
           "minimum": 0,
@@ -55,7 +55,7 @@
           ]
         },
         "images": {
-          "description": "Whether this model takes image input. Unset means \"not declared\".",
+          "description": "Whether this model takes image input. `false` makes the Chat wire\nrefuse a request that carries an image; unset still sends it.",
           "type": [
             "boolean",
             "null"

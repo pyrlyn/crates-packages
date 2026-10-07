@@ -12,7 +12,9 @@ use figment::providers::{Format, Toml};
 use schemars::{JsonSchema, schema_for};
 use serde::de::DeserializeOwned;
 
-use crate::catalog::{ModelEntry, ModelsFile};
+use llm_wire::ProviderModel;
+
+use crate::catalog::ModelsFile;
 use crate::price::PriceFile;
 
 pub(crate) const MODELS_TOML: &str = include_str!("../models.toml");
@@ -27,7 +29,7 @@ pub(crate) fn parse<T: DeserializeOwned>(content: &str) -> Result<T, String> {
 }
 
 /// The embedded built-in model rows.
-pub(crate) fn builtin_models() -> Result<Vec<ModelEntry>, String> {
+pub(crate) fn builtin_models() -> Result<Vec<ProviderModel>, String> {
     Ok(parse::<ModelsFile>(MODELS_TOML)?.model)
 }
 

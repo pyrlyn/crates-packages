@@ -3,14 +3,14 @@
 
 //! The merged model catalog: one [`ModelRow`] per model id, combining four
 //! layers in override order — built-in rows < plugin `[[models]]` rows
-//! (fill-only) < the host's configured [`ModelEntry`]s < a user price file.
-//! The effort map (`effort.rs`) is a reader of `capabilities`; this module
-//! only builds and merges the row.
+//! (fill-only) < the host's configured [`ProviderModel`]s < a user price file.
+//! The effort rule (`llm_wire::effort_for`) is a reader of `capabilities`;
+//! this module only builds and merges the row.
 
 use std::collections::HashMap;
 use std::fmt;
 
-use llm_wire::Effort;
+use llm_wire::{Capabilities, Effort, ProviderModel};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -18,40 +18,11 @@ use thiserror::Error;
 use crate::config;
 use crate::price::{Price, PriceError, PriceTable};
 
-/// One configured model: what a host's `[providers.*].models` entry (or a
-/// built-in `models.toml` row) says about a model id. The host fills these
-/// from its own config, so this crate depends on no config type of the
-/// host's. An empty `efforts` means "any".
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[serde(deny_unknown_fields, default)]
-pub struct ModelEntry {
-    /// The model id sent on the wire (for gateways the full `vendor/model`
-    /// id, e.g. `"anthropic/claude-sonnet-5"`).
-    pub id: String,
-    /// What a person calls the model (`"Claude Sonnet 5"`). Unset means a
-    /// reader shows the id.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub display_name: Option<String>,
-    /// Context window in tokens.
-    pub context_window: u32,
-    /// Efforts this model supports; empty means "any".
-    pub efforts: Vec<Effort>,
-    /// Whether this model takes the Chat Completions `reasoning_effort`
-    /// field. Unset means "not declared", and a chat wire then sends no
-    /// effort at all: OpenAI documents the field, LM Studio's compatible
-    /// endpoint does not list it, so it is opt-in per model.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub reasoning_effort: Option<bool>,
-    /// Whether this model takes image input. Unset means "not declared".
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub images: Option<bool>,
-}
-
 /// The shape of a whole `models.toml`.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct ModelsFile {
-    pub(crate) model: Vec<ModelEntry>,
+    pub(crate) model: Vec<ProviderModel>,
 }
 
 /// A plugin's `[[models]]` row, as [`Catalog::load`] takes it. The host maps
@@ -81,37 +52,6 @@ pub struct PluginPrice {
     pub cache_write: Option<f64>,
 }
 
-/// What a model is known to support. Every field is `None` until a data
-/// source supplies it: the built-in rows carry no capability flags, so they
-/// start out `Default`; [`effort_for`](crate::effort_for) is the first
-/// reader.
-#[derive(Debug, Clone, Default, PartialEq)]
-pub struct Capabilities {
-    /// Accepts tool definitions on a request.
-    pub tools: Option<bool>,
-    /// Sends extended/adaptive thinking.
-    pub adaptive_thinking: Option<bool>,
-    /// Accepts a reasoning-effort wire parameter. Declared per model by
-    /// [`ModelEntry::reasoning_effort`]; read by [`crate::effort_for`] for
-    /// the Chat wire.
-    pub reasoning_effort_param: Option<bool>,
-    /// Accepts image input. Declared per model by [`ModelEntry::images`].
-    pub images: Option<bool>,
-}
-
-impl Capabilities {
-    /// What a configured entry declares. A wire that holds only its
-    /// section's entries (Chat) and the catalog merge both read it here,
-    /// so the two cannot disagree.
-    pub fn declared_by(model: &ModelEntry) -> Self {
-        Self {
-            reasoning_effort_param: model.reasoning_effort,
-            images: model.images,
-            ..Self::default()
-        }
-    }
-}
-
 /// One catalog row: everything the catalog knows about a model id.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ModelRow {
@@ -124,9 +64,9 @@ pub struct ModelRow {
     /// Context window in tokens, when a layer has supplied one.
     pub context_window: Option<u32>,
     /// Max output tokens, when a layer has supplied one (no source emits
-    /// this yet; see [`Capabilities`]'s doc comment).
+    /// this yet).
     pub max_output: Option<u32>,
-    /// Efforts this model supports; empty means "any" — `ModelEntry`'s
+    /// Efforts this model supports; empty means "any" — `ProviderModel`'s
     /// own convention, kept so a row built from config matches it exactly.
     pub efforts: Vec<Effort>,
     /// Capability flags, absent where the data doesn't exist yet.
@@ -163,7 +103,7 @@ pub enum RowSource {
     Builtin,
     /// A granted plugin's `[[models]]` row; holds the plugin id.
     Plugin(String),
-    /// The host's configured [`ModelEntry`]s.
+    /// The host's configured [`ProviderModel`]s.
     Config,
     /// The user price file.
     UserPrices,
@@ -219,37 +159,6 @@ fn same_rates(a: &Price, b: &Price) -> bool {
         && a.cache_read == b.cache_read
 }
 
-/// Model-id prefixes that take Anthropic's `thinking: {"type": "adaptive"}`
-/// field. Older models want `{"type": "enabled", "budget_tokens": N}`,
-/// which is a 400 on these — cox never sends `budget_tokens`, so an
-/// unlisted model simply gets no `thinking` field.
-///
-/// It stays a plain prefix rule rather than a `ModelRow`/`Capabilities`
-/// field: no data source emits an adaptive-thinking signal today
-/// (`Capabilities::adaptive_thinking` is `None` on every row), and a
-/// row-based lookup would silently stop matching a model id that names no
-/// catalog row at all (a preview or custom variant the prefix table has
-/// always matched by name).
-const ADAPTIVE_THINKING_PREFIXES: &[&str] = &[
-    "claude-opus-5",
-    "claude-sonnet-5",
-    "claude-haiku-5",
-    "claude-fable-5",
-    "claude-mythos-5",
-    "claude-opus-4-6",
-    "claude-opus-4-7",
-    "claude-opus-4-8",
-    "claude-sonnet-4-6",
-];
-
-/// Whether `model_id` takes Anthropic's adaptive `thinking` field (see
-/// [`ADAPTIVE_THINKING_PREFIXES`]).
-pub fn supports_adaptive_thinking(model_id: &str) -> bool {
-    ADAPTIVE_THINKING_PREFIXES
-        .iter()
-        .any(|p| model_id.starts_with(p))
-}
-
 /// Why a catalog could not be built.
 #[derive(Debug, Error)]
 pub enum CatalogError {
@@ -290,7 +199,7 @@ impl Catalog {
     /// already read by the caller; this crate does no I/O of its own).
     /// Ignored plugin rows are listed in [`Catalog::warnings`].
     pub fn load(
-        models: &[ModelEntry],
+        models: &[ProviderModel],
         plugins: &[PluginModels<'_>],
         user_prices_toml: Option<&str>,
     ) -> Result<Self, CatalogError> {
@@ -301,7 +210,7 @@ impl Catalog {
     /// a test can start from a built-in layer it shaped itself.
     fn layered(
         mut self,
-        models: &[ModelEntry],
+        models: &[ProviderModel],
         plugins: &[PluginModels<'_>],
         user_prices_toml: Option<&str>,
     ) -> Result<Self, CatalogError> {
@@ -413,7 +322,7 @@ impl Catalog {
         }
     }
 
-    fn overlay_model(&mut self, model: &ModelEntry, source: &RowSource) {
+    fn overlay_model(&mut self, model: &ProviderModel, source: &RowSource) {
         let row = self.row_mut(&model.id, source);
         row.context_window = Some(model.context_window);
         if model.display_name.is_some() {
@@ -432,7 +341,7 @@ impl Catalog {
         }
     }
 
-    fn overlay_models(&mut self, models: &[ModelEntry], source: &RowSource) {
+    fn overlay_models(&mut self, models: &[ProviderModel], source: &RowSource) {
         for model in models {
             self.overlay_model(model, source);
         }
@@ -480,10 +389,10 @@ source_url = "https://example.test"
 
     #[test]
     fn served_context_overrides_config_and_keeps_the_price() {
-        let config = vec![ModelEntry {
+        let config = vec![ProviderModel {
             id: "claude-haiku-4-5".into(),
             context_window: 1_000,
-            ..ModelEntry::default()
+            ..ProviderModel::default()
         }];
         let mut catalog = Catalog::load(&config, &[], None).expect("catalog");
         catalog.overlay_served("claude-haiku-4-5", Some(251_648), Some(true));
@@ -601,10 +510,10 @@ source_url = "https://example.test"
             plugin: "jev",
             models: &models,
         }];
-        let config = vec![ModelEntry {
+        let config = vec![ProviderModel {
             id: "acme-coder".into(),
             context_window: 128_000,
-            ..ModelEntry::default()
+            ..ProviderModel::default()
         }];
         let user = user_price_toml("acme-coder", 9.0);
         let catalog = Catalog::load(&config, &plugins, Some(&user)).expect("catalog");
@@ -658,15 +567,15 @@ source_url = "https://example.test"
     #[test]
     fn a_config_entry_without_a_name_keeps_the_builtin_one_and_a_new_id_has_none() {
         let config = vec![
-            ModelEntry {
+            ProviderModel {
                 id: "claude-sonnet-5".into(),
                 context_window: 555_000,
-                ..ModelEntry::default()
+                ..ProviderModel::default()
             },
-            ModelEntry {
+            ProviderModel {
                 id: "qwen3-coder".into(),
                 context_window: 32_768,
-                ..ModelEntry::default()
+                ..ProviderModel::default()
             },
         ];
         let catalog = Catalog::load(&config, &[], None).expect("catalog");
@@ -688,11 +597,11 @@ source_url = "https://example.test"
 
     #[test]
     fn config_models_override_builtin_context_window_and_efforts() {
-        let config = vec![ModelEntry {
+        let config = vec![ProviderModel {
             id: "claude-haiku-4-5".into(),
             context_window: 555_000,
             efforts: vec![Effort::Low, Effort::High],
-            ..ModelEntry::default()
+            ..ProviderModel::default()
         }];
         let catalog = Catalog::load(&config, &[], None).expect("catalog");
         let row = catalog.get("claude-haiku-4-5").expect("haiku row");
@@ -704,11 +613,11 @@ source_url = "https://example.test"
 
     #[test]
     fn user_price_file_overrides_both_builtin_and_config_layers() {
-        let config = vec![ModelEntry {
+        let config = vec![ProviderModel {
             id: "claude-haiku-4-5".into(),
             context_window: 555_000,
             efforts: vec![],
-            ..ModelEntry::default()
+            ..ProviderModel::default()
         }];
         let user = user_price_toml("claude-haiku-4-5", 42.0);
         let catalog = Catalog::load(&config, &[], Some(&user)).expect("catalog");
@@ -729,22 +638,12 @@ source_url = "https://example.test"
     }
 
     #[test]
-    fn supports_adaptive_thinking_matches_listed_prefixes_only() {
-        assert!(supports_adaptive_thinking("claude-sonnet-5"));
-        // Prefix match, not exact match: a dated/preview suffix still hits.
-        assert!(supports_adaptive_thinking("claude-sonnet-5-20260115"));
-        // Not listed: an older/unlisted family gets no `thinking` field.
-        assert!(!supports_adaptive_thinking("claude-haiku-4-5"));
-        assert!(!supports_adaptive_thinking("gpt-5.1"));
-    }
-
-    #[test]
     fn config_entry_declares_the_reasoning_effort_param() {
-        let config = vec![ModelEntry {
+        let config = vec![ProviderModel {
             id: "qwen3-coder".into(),
             context_window: 32_768,
             reasoning_effort: Some(true),
-            ..ModelEntry::default()
+            ..ProviderModel::default()
         }];
         let catalog = Catalog::load(&config, &[], None).expect("catalog");
         let row = catalog.get("qwen3-coder").expect("qwen row");
@@ -756,14 +655,14 @@ source_url = "https://example.test"
 
     #[test]
     fn empty_config_efforts_do_not_erase_the_builtin_efforts() {
-        // `ModelEntry.efforts: []` means "any" (its own doc comment) —
+        // `ProviderModel.efforts: []` means "any" (its own doc comment) —
         // a config override that doesn't mention efforts must not clear
         // whatever the built-in row already had.
-        let config = vec![ModelEntry {
+        let config = vec![ProviderModel {
             id: "claude-haiku-4-5".into(),
             context_window: 555_000,
             efforts: vec![],
-            ..ModelEntry::default()
+            ..ProviderModel::default()
         }];
         let builtin = Catalog::builtin().expect("builtin catalog");
         let builtin_efforts = builtin
