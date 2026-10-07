@@ -6,6 +6,7 @@ Small, focused Rust crates shared by the creator's projects (`ketch`, `rtok`, `s
 
 | Crate | What it does |
 | --- | --- |
+| [`bless-check`](bless-check) | Check that a committed generated file matches what the code renders now, or rewrite it when blessed (not published) |
 | [`cargo-changed-packages`](cargo-changed-packages) | Workspace packages a set of changed paths affects, including reverse dependencies |
 | [`change-preview`](change-preview) | Preview what a command would change: diff or `--stat` of edits, size and file count of removals, totals |
 | [`file-backup`](file-backup) | Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it |
