@@ -138,3 +138,32 @@ fn skills_later_directories_override_earlier_same_names() {
     assert_eq!(found.skills.len(), 1);
     assert_eq!(found.skills[0].description, "from project");
 }
+
+#[test]
+fn skills_metadata_non_string_values_render_as_yaml_text() {
+    let dir = tempfile::tempdir().unwrap();
+    let d = dir.path().join("meta");
+    std::fs::create_dir_all(&d).unwrap();
+    std::fs::write(
+        d.join("SKILL.md"),
+        "---\nname: meta\ndescription: d\nmetadata:\n  quoted: \"1\"\n  int: 2\n  float: 1.5\n  flag: true\n  nothing: null\n  tags: [a, b]\n  nested: {k: v}\n---\nbody\n",
+    )
+    .unwrap();
+    let found = discover(&[dir.path().to_path_buf()]);
+    assert!(found.notices.is_empty(), "{:?}", found.notices);
+    let m = &found.skills[0].metadata;
+    let got: Vec<(&str, &str)> = m.iter().map(|(k, v)| (k.as_str(), v.as_str())).collect();
+    // Pinned: the same text serde_yaml 0.9 gave before the move to serde-saphyr.
+    assert_eq!(
+        got,
+        [
+            ("flag", "true"),
+            ("float", "1.5"),
+            ("int", "2"),
+            ("nested", "k: v"),
+            ("nothing", "null"),
+            ("quoted", "1"),
+            ("tags", "- a\n- b"),
+        ]
+    );
+}

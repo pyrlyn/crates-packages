@@ -39,20 +39,20 @@ pub fn split(text: &str) -> Result<(&str, &str), FrontmatterError> {
 /// Parses the header into `T` and returns it with the body.
 pub fn parse<T: DeserializeOwned>(text: &str) -> Result<(T, &str), FrontmatterError> {
     let (yaml, body) = split(text)?;
-    let value = serde_yaml::from_str(yaml).map_err(|e| FrontmatterError::Yaml(e.to_string()))?;
+    let value = serde_saphyr::from_str(yaml).map_err(|e| FrontmatterError::Yaml(e.to_string()))?;
     Ok((value, body))
 }
 
 /// A field that Claude writes either as a YAML list or as one string of
 /// space- or comma-separated names (`allowed-tools: Read Bash`).
-pub fn names(value: Option<&serde_yaml::Value>) -> Vec<String> {
+pub fn names(value: Option<&serde_json::Value>) -> Vec<String> {
     match value {
-        Some(serde_yaml::Value::Sequence(items)) => items
+        Some(serde_json::Value::Array(items)) => items
             .iter()
             .filter_map(|v| v.as_str().map(str::trim).map(String::from))
             .filter(|s| !s.is_empty())
             .collect(),
-        Some(serde_yaml::Value::String(s)) => s
+        Some(serde_json::Value::String(s)) => s
             .split(|c: char| c == ',' || c.is_whitespace())
             .filter(|s| !s.is_empty())
             .map(String::from)
@@ -76,9 +76,9 @@ mod tests {
 
     #[test]
     fn frontmatter_names_accepts_list_and_string_forms() {
-        let list: serde_yaml::Value = serde_yaml::from_str("- read\n- grep\n").unwrap();
+        let list: serde_json::Value = serde_saphyr::from_str("- read\n- grep\n").unwrap();
         assert_eq!(names(Some(&list)), ["read", "grep"]);
-        let text = serde_yaml::Value::String("Read, Bash grep".into());
+        let text = serde_json::Value::String("Read, Bash grep".into());
         assert_eq!(names(Some(&text)), ["Read", "Bash", "grep"]);
         assert!(names(None).is_empty());
     }
