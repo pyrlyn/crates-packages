@@ -1650,6 +1650,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "llm-catalog"
+version = "0.1.0"
+dependencies = [
+ "figment",
+ "llm-wire",
+ "schemars 1.2.2",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "llm-http"
 version = "0.1.0"
 dependencies = [
