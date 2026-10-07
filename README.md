@@ -2,7 +2,7 @@
 
 [![ci](https://github.com/pyrlyn/crates-packages/actions/workflows/ci.yml/badge.svg)](https://github.com/pyrlyn/crates-packages/actions/workflows/ci.yml) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=listepo_crates-packages&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=listepo_crates-packages) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=listepo_crates-packages&metric=coverage)](https://sonarcloud.io/component_measures?id=listepo_crates-packages&metric=coverage) [![Tests](https://img.shields.io/sonar/tests/listepo_crates-packages?server=https%3A%2F%2Fsonarcloud.io&compact_message)](https://sonarcloud.io/component_measures?id=listepo_crates-packages&metric=tests)
 
-Small, focused Rust crates shared by `ketch` and `rtok`.
+Small, focused Rust crates shared by the creator's projects (`ketch`, `rtok`, `scull` and others).
 
 | Crate | What it does |
 | --- | --- |
@@ -12,6 +12,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | [`git-changed-paths`](git-changed-paths) | Paths a git working tree changed relative to a base ref |
 | [`path-gates`](path-gates) | Map changed paths to named gates by glob rules from a TOML config |
 | [`scoped-check`](scoped-check) | Run only the check commands a change touches (binary) |
+| [`workspace-graph`](workspace-graph) | Load a workspace's direct dependency graph and assert rules over it in tests (not published) |
 
 ## Commands
 
