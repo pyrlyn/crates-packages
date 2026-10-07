@@ -18,6 +18,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | [`llm-wire`](llm-wire) | Provider contract and neutral request, event and tool types for LLM backends (unpublished) |
 | [`path-gates`](path-gates) | Map changed paths to named gates by glob rules from a TOML config |
 | [`perm-rules`](perm-rules) | Permission rules for tool calls: `Tool(subject)` grammar, deny/allow/ask decision order, risk fallback |
+| [`proc-sandbox`](proc-sandbox) | Confine a child process: Seatbelt on macOS, bubblewrap or Landlock plus seccomp on Linux, and a path guard for workspace roots |
 | [`scoped-check`](scoped-check) | Run only the check commands a change touches (binary) |
 
 ## Commands
