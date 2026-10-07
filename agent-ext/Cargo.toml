@@ -1,0 +1,29 @@
+[package]
+name = "agent-ext"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.98"
+description = "Agent extension points: SKILL.md discovery with a deferred skill tool, and Claude-Code-style shell hooks (JSON on stdin, exit 2 blocks) that fail open"
+license = "GPL-3.0-or-later OR LicenseRef-Royalty-Free"
+repository = "https://github.com/pyrlyn/crates-packages"
+keywords = ["agent", "skills", "hooks", "claude-code"]
+categories = ["development-tools"]
+publish = false
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1"
+# serde_yaml is deprecated upstream; kept for no behaviour change from cox (see ideas.md).
+serde_yaml = "0.9"
+thiserror = "2"
+
+[dev-dependencies]
+tempfile = "3"
