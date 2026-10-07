@@ -11,6 +11,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | [`file-backup`](file-backup) | Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it |
 | [`git-changed-paths`](git-changed-paths) | Paths a git working tree changed relative to a base ref |
 | [`llm-http`](llm-http) | HTTP plumbing for LLM provider wires: credential lookup, auth headers, error mapping, retry with backoff, SSE framing |
+| [`llm-wire`](llm-wire) | Provider contract and neutral request, event and tool types for LLM backends (unpublished) |
 | [`path-gates`](path-gates) | Map changed paths to named gates by glob rules from a TOML config |
 | [`scoped-check`](scoped-check) | Run only the check commands a change touches (binary) |
 
