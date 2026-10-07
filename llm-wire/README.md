@@ -11,6 +11,12 @@ The provider contract for LLM agent loops.
 - `Risk`, `Concurrency`, `Tier`, `Job`, `Effort`: the labels a request and a
   tool carry.
 
+- `ProviderModel`, `Capabilities`: a configured model entry and what it
+  supports, shared by the wires and the catalog.
+- `effort_for`, `Api`, `WireEffort`, `supports_adaptive_thinking`: the one
+  rule for which effort a wire sends.
+- `ulid_id!`: declares a ULID newtype id; `CallId` and `ArchiveId` use it.
+
 Everything serializes with serde and derives `JsonSchema`.
 
 Feature `test-util` adds `test_util::scripted` (a TOML scenario format and the

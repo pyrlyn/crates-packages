@@ -9,20 +9,26 @@
 //!
 //! - [`ids`] — `CallId`, `ArchiveId`: ULID newtypes.
 //! - [`errors`] — `ProviderError`.
+//! - [`model`] — `ProviderModel` (a configured model entry) and `Capabilities` (what it supports).
+//! - [`effort`] — the one rule for which effort each wire sends (`effort_for`), and `supports_adaptive_thinking`.
 //! - [`types`] — `Request`, `ProviderEvent`, `Caps`, `ToolSpec`, `Usage`, `Risk` and everything reachable from them.
 //! - [`traits`] — `Provider`.
 //! - `test_util` (feature `test-util`) — scenario and cassette helpers for test doubles.
 
+pub mod effort;
 pub mod errors;
 pub mod ids;
+pub mod model;
 pub mod traits;
 pub mod types;
 
 #[cfg(feature = "test-util")]
 pub mod test_util;
 
+pub use effort::{Api, WireEffort, effort_for, supports_adaptive_thinking};
 pub use errors::ProviderError;
 pub use ids::{ArchiveId, CallId};
+pub use model::{Capabilities, ProviderModel};
 pub use traits::Provider;
 pub use types::{
     ArchiveRef, Caps, Concurrency, Content, Effort, Job, Message, ModelId, ProviderEvent,

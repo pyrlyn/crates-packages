@@ -1,15 +1,11 @@
-// Copyright (c) 2026 Ivan Tugay
-// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Royalty-Free
+//! The one effort rule: which effort, if any, each wire sends for a request.
+//! It depends on what a model declares ([`Capabilities`]), so no wire decides
+//! for itself whether to send one. Each wire still turns the returned
+//! [`Effort`] into its own generated enum; that is a type conversion the
+//! compiler checks, not a policy.
 
-//! The one effort map: which effort, if any, each wire sends for a request.
-//! It lives next to the catalog because the answer depends on what a model
-//! row declares, and so no wire decides for itself whether to send one.
-//! Each wire still turns the returned [`Effort`] into its own generated
-//! enum; that is a type conversion the compiler checks, not a policy.
-
-use llm_wire::Effort;
-
-use crate::catalog::Capabilities;
+use crate::model::Capabilities;
+use crate::types::Effort;
 
 /// The request shape a provider speaks.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -59,6 +55,37 @@ pub fn effort_for(api: Api, effort: Effort, caps: &Capabilities) -> Option<WireE
         Api::Chat => (caps.reasoning_effort_param == Some(true)).then_some(plain),
         Api::Jev => None,
     }
+}
+
+/// Model-id prefixes that take Anthropic's `thinking: {"type": "adaptive"}`
+/// field. Older models want `{"type": "enabled", "budget_tokens": N}`,
+/// which is a 400 on these — no wire here sends `budget_tokens`, so an
+/// unlisted model simply gets no `thinking` field.
+///
+/// It stays a plain prefix rule rather than a `Capabilities`
+/// field: no data source emits an adaptive-thinking signal today
+/// (`Capabilities::adaptive_thinking` is `None` on every row), and a
+/// row-based lookup would silently stop matching a model id that names no
+/// catalog row at all (a preview or custom variant the prefix table has
+/// always matched by name).
+const ADAPTIVE_THINKING_PREFIXES: &[&str] = &[
+    "claude-opus-5",
+    "claude-sonnet-5",
+    "claude-haiku-5",
+    "claude-fable-5",
+    "claude-mythos-5",
+    "claude-opus-4-6",
+    "claude-opus-4-7",
+    "claude-opus-4-8",
+    "claude-sonnet-4-6",
+];
+
+/// Whether `model_id` takes Anthropic's adaptive `thinking` field (see
+/// [`ADAPTIVE_THINKING_PREFIXES`]).
+pub fn supports_adaptive_thinking(model_id: &str) -> bool {
+    ADAPTIVE_THINKING_PREFIXES
+        .iter()
+        .any(|p| model_id.starts_with(p))
 }
 
 #[cfg(test)]
@@ -112,5 +139,15 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn supports_adaptive_thinking_matches_listed_prefixes_only() {
+        assert!(supports_adaptive_thinking("claude-sonnet-5"));
+        // Prefix match, not exact match: a dated/preview suffix still hits.
+        assert!(supports_adaptive_thinking("claude-sonnet-5-20260115"));
+        // Not listed: an older/unlisted family gets no `thinking` field.
+        assert!(!supports_adaptive_thinking("claude-haiku-4-5"));
+        assert!(!supports_adaptive_thinking("gpt-5.1"));
     }
 }
