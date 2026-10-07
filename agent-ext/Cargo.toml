@@ -24,6 +24,15 @@ serde_json = "1"
 # serde_yaml is deprecated upstream; kept for no behaviour change from cox (see ideas.md).
 serde_yaml = "0.9"
 thiserror = "2"
+async-trait = "0.1"
+# `[hooks]` config types carry a schema so a host can embed it in its own.
+schemars = "1"
+tokio = { version = "1", features = ["io-util", "process", "time"] }
+# Kills the whole process group of a timed-out hook, not just its shell.
+nix = { version = "0.31", features = ["signal"] }
+# A `matcher` that is not a plain tool name compiles as a regex.
+regex = "1"
 
 [dev-dependencies]
 tempfile = "3"
+tokio = { version = "1", features = ["macros", "rt"] }
