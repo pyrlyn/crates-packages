@@ -8,7 +8,6 @@ license = "GPL-3.0-or-later OR LicenseRef-Royalty-Free"
 repository = "https://github.com/pyrlyn/crates-packages"
 keywords = ["permissions", "agent", "rules", "policy"]
 categories = ["authentication", "development-tools"]
-license-file = "../LICENSE-ROYALTY-FREE.md"
 readme = "README.md"
 exclude = ["AGENTS.md", "done.md", "ideas.md", "justfile", "plan.md", "roadmap.md", "todo.md", "toolchain.md"]
 

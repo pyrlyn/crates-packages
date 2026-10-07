@@ -8,7 +8,6 @@ license = "GPL-3.0-or-later OR LicenseRef-Royalty-Free"
 repository = "https://github.com/pyrlyn/crates-packages"
 keywords = ["bash", "shell", "permissions", "tree-sitter"]
 categories = ["parser-implementations", "command-line-interface"]
-license-file = "../LICENSE-ROYALTY-FREE.md"
 readme = "README.md"
 exclude = ["AGENTS.md", "done.md", "ideas.md", "justfile", "plan.md", "roadmap.md", "todo.md", "toolchain.md"]
 
