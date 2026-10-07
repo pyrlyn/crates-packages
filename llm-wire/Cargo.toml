@@ -10,6 +10,10 @@ keywords = ["llm", "agent", "provider", "streaming"]
 categories = ["api-bindings", "asynchronous"]
 publish = false
 
+[features]
+# Scenario parsing and cassette helpers for Provider test doubles.
+test-util = ["dep:figment", "dep:sha2"]
+
 [dependencies]
 async-trait = "0.1"
 schemars = "1"
@@ -21,6 +25,8 @@ thiserror = "2"
 tokio = { version = "1", default-features = false, features = ["sync"] }
 tokio-util = "0.7"
 ulid = { version = "3", features = ["serde"] }
+figment = { version = "0.10", default-features = false, features = ["toml"], optional = true }
+sha2 = { version = "0.11", optional = true }
 
 [dev-dependencies]
 pretty_assertions = "1.4"

@@ -18,6 +18,9 @@ pub mod ids;
 pub mod traits;
 pub mod types;
 
+#[cfg(feature = "test-util")]
+pub mod test_util;
+
 pub use errors::ProviderError;
 pub use ids::{ArchiveId, CallId};
 pub use traits::Provider;
