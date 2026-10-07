@@ -1,0 +1,23 @@
+[package]
+name = "shell-classify"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+description = "Classify a bash command line by risk (read-only, write, exec, destructive) and list the simple commands it runs, with tree-sitter"
+license = "GPL-3.0-or-later OR LicenseRef-Royalty-Free"
+repository = "https://github.com/pyrlyn/crates-packages"
+keywords = ["bash", "shell", "permissions", "tree-sitter"]
+categories = ["parser-implementations", "command-line-interface"]
+publish = false
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+
+[dependencies]
+tree-sitter = "0.27"
+tree-sitter-bash = "0.25"

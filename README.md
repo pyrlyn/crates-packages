@@ -12,6 +12,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | [`git-changed-paths`](git-changed-paths) | Paths a git working tree changed relative to a base ref |
 | [`path-gates`](path-gates) | Map changed paths to named gates by glob rules from a TOML config |
 | [`scoped-check`](scoped-check) | Run only the check commands a change touches (binary) |
+| [`shell-classify`](shell-classify) | Rate a bash command line `ReadOnly`/`Write`/`Exec`/`Destructive` and list the simple commands it runs (not published yet) |
 
 ## Commands
 
