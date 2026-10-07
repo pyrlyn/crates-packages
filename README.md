@@ -6,6 +6,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 
 | Crate | What it does |
 | --- | --- |
+| [`agent-host-config`](agent-host-config) | Register and unregister an MCP server in an agent host's JSON config file, changing only our entry |
 | [`cargo-changed-packages`](cargo-changed-packages) | Workspace packages a set of changed paths affects, including reverse dependencies |
 | [`change-preview`](change-preview) | Preview what a command would change: diff or `--stat` of edits, size and file count of removals, totals |
 | [`file-backup`](file-backup) | Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it |
