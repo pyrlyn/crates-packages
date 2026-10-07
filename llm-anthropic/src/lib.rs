@@ -10,6 +10,7 @@
 //! consumers.
 
 pub mod request;
+pub mod stream;
 /// Wire types generated from the vendored OpenAPI spec — internal to this
 /// module; `request` and `stream` are the only consumers.
 mod wire;
