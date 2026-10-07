@@ -10,8 +10,9 @@ The OpenAI wires for LLM agent loops, on top of `llm-wire` and `llm-http`.
 - `responses`: the Responses API (`POST /v1/responses`) OpenAI's own models
   use, with request and event types from `async-openai`'s `response-types`
   (no second HTTP client).
-- `config`: the section and model fields the wires read (`Transport`,
-  `ProviderModel`, `Capabilities`).
+- The section and model fields the wires read are `llm_http::Transport`,
+  `llm_wire::ProviderModel` and `llm_wire::Capabilities`; the Chat wire's
+  effort decision is `llm_wire::effort_for`.
 
 Each wire exposes `build_body` (request translation), a state machine that
 turns SSE frames into `ProviderEvent`s, and a provider that implements
@@ -19,7 +20,7 @@ turns SSE frames into `ProviderEvent`s, and a provider that implements
 
 ```rust
 use llm_openai::chat::OpenAiChatProvider;
-use llm_openai::config::Transport;
+use llm_http::Transport;
 
 fn ollama() -> Result<OpenAiChatProvider, llm_wire::ProviderError> {
     let transport = Transport {

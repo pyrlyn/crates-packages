@@ -49,15 +49,15 @@
 
 use async_trait::async_trait;
 use futures::StreamExt;
+use llm_http::Transport;
 use llm_wire::{
-    CallId, Caps, Content, Effort, Message, Provider, ProviderError, ProviderEvent, ProviderId,
-    Request, Role, StopReason, Usage,
+    Api, CallId, Capabilities, Caps, Content, Effort, Message, Provider, ProviderError,
+    ProviderEvent, ProviderId, ProviderModel, Request, Role, StopReason, Usage, effort_for,
 };
 use serde_json::Value;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
-use crate::config::{ProviderModel, Transport};
 use crate::wire;
 
 /// Translates a `Request` into the JSON body for `POST /v1/responses`,
@@ -72,6 +72,8 @@ pub fn build_body(req: &Request) -> Result<Value, ProviderError> {
         items.extend(message_items(m)?);
     }
 
+    // Responses reads no model capability: it always sends the effort.
+    let sent = effort_for(Api::Responses, req.effort, &Capabilities::default());
     let tools: Vec<wire::Tool> = req
         .tools
         .iter()
@@ -91,9 +93,8 @@ pub fn build_body(req: &Request) -> Result<Value, ProviderError> {
         stream: Some(true),
         store: Some(false),
         max_output_tokens: Some(req.max_tokens),
-        // Responses reads no model capability: it always sends the effort.
         reasoning: Some(wire::Reasoning {
-            effort: Some(effort(req.effort)),
+            effort: sent.map(|s| effort(s.effort)),
             ..Default::default()
         }),
         instructions: (!req.system.is_empty()).then(|| {

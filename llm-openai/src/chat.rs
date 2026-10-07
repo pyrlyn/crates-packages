@@ -36,22 +36,21 @@
 
 use async_trait::async_trait;
 use futures::StreamExt;
+use llm_http::Transport;
 use llm_wire::{
-    CallId, Caps, Content, Message, Provider, ProviderError, ProviderEvent, ProviderId, Request,
-    Role, StopReason, Usage,
+    Api, CallId, Capabilities, Caps, Content, Message, Provider, ProviderError, ProviderEvent,
+    ProviderId, ProviderModel, Request, Role, StopReason, Usage, effort_for,
 };
 use serde_json::{Value, json};
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
-
-use crate::config::{Capabilities, ProviderModel, Transport};
 
 /// Translates a `Request` into the JSON body for `POST /v1/chat/completions`.
 /// Errors when history carries a signed thinking block that is not a tool
 /// call's signature (see module header) or an image for a model declared
 /// `images = false` — every other shape translates unconditionally. `caps`
 /// is what the model's `models` entry declares: `reasoning_effort` goes out
-/// only when it declares the field ([`Capabilities::chat_effort`]).
+/// only when it declares the field ([`effort_for`] with [`Api::Chat`]).
 pub fn build_body(req: &Request, caps: &Capabilities) -> Result<Value, ProviderError> {
     // The core already holds images back from a Chat model that does not
     // declare them; this is the wire's own refusal, so a declared
@@ -110,8 +109,8 @@ pub fn build_body(req: &Request, caps: &Capabilities) -> Result<Value, ProviderE
     if !req.stop_sequences.is_empty() {
         obj.insert("stop".into(), json!(req.stop_sequences));
     }
-    if let Some(effort) = caps.chat_effort(req.effort) {
-        obj.insert("reasoning_effort".into(), json!(effort.name()));
+    if let Some(sent) = effort_for(Api::Chat, req.effort, caps) {
+        obj.insert("reasoning_effort".into(), json!(sent.effort.name()));
     }
     Ok(body)
 }

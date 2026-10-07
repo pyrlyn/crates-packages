@@ -17,14 +17,14 @@
 //! `ProviderError`.
 //!
 //! Extracted from cox's `cox-provider-openai` so cox and aulo share one copy.
-//! [`config`] holds the few section and model fields the wires read, which
-//! cox keeps in its own config and catalog crates.
+//! The section and model types the wires read (`llm_http::Transport`,
+//! `llm_wire::ProviderModel`, `llm_wire::Capabilities`) live in the crates
+//! below, so a host holds one copy of each.
 
 // Imported at the crate root so the wires' `crate::http`, `crate::retry` and
 // `crate::sse` paths resolve exactly as they did inside cox.
 use llm_http::{http, retry, sse};
 
 pub mod chat;
-pub mod config;
 pub mod responses;
 mod wire;
