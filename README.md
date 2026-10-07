@@ -50,6 +50,11 @@ cargo fmt --all -- --check
   Anything failing before the merge closes the pull request: no tag, no
   release. `-f dry-run=true` opens the pull request, waits for its checks and
   closes it.
+- A crate is released after the sibling crates it depends on: `llm-wire` before
+  `llm-http`, `llm-wire-openai`, `llm-wire-anthropic`, `llm-catalog` and
+  `agent-loop`; `file-backup` before `agent-host-config`. Those dependency
+  lines carry both `path` and `version`, so `cargo publish` fails while a
+  sibling is not on crates.io yet.
 
 Secrets: `CARGO_REGISTRY_TOKEN` (crates.io API token) and
 `RELEASE_PLZ_TOKEN` (a PAT that can trigger workflows; bump opens the
@@ -62,7 +67,7 @@ Two secrets must exist in the repo settings
 
 | Secret | Where to get it | Used by |
 | --- | --- | --- |
-| `CARGO_REGISTRY_TOKEN` | crates.io → Account Settings → API Tokens → New Token (needs `publish-new` and `publish-update` scopes; restrict it to the `file-backup` and `change-preview` crates). Add with `gh secret set CARGO_REGISTRY_TOKEN --repo pyrlyn/crates-packages` | `release.yml`, job `crates-io`: `cargo publish -p <crate>` |
+| `CARGO_REGISTRY_TOKEN` | crates.io → Account Settings → API Tokens → New Token (needs `publish-new` and `publish-update` scopes; restrict it to the crates listed above). Add with `gh secret set CARGO_REGISTRY_TOKEN --repo pyrlyn/crates-packages` | `release.yml`, job `crates-io`: `cargo publish -p <crate>` |
 | `RELEASE_PLZ_TOKEN` | A fine-grained PAT (or GitHub App token) with **Contents** and **Pull requests** read/write on this repo — see https://release-plz.dev/docs/github/token. The default `GITHUB_TOKEN` cannot trigger `release.yml` from the release PR it opens, so without this the release PR would land without CI. Add with `gh secret set RELEASE_PLZ_TOKEN --repo pyrlyn/crates-packages` | `bump.yml`: pushes the version branch and opens the version PR |
 
 Without `CARGO_REGISTRY_TOKEN` the release stops at the `crates-io` job with
@@ -74,3 +79,11 @@ open the pull request (workflow permissions), so it fails before any tag.
 
 Licensed under the [GNU General Public License v3.0 or later](LICENSE)
 (`GPL-3.0-or-later`).
+
+The crates shared with cox and aulo (`agent-ext`, `agent-host-config`,
+`agent-loop`, `config-schema`, `llm-*`, `mcp-client-host`, `perm-rules`,
+`proc-sandbox`, `shell-classify`, `speech-capture`, `text-sanitize`) are
+offered under `GPL-3.0-or-later OR LicenseRef-Royalty-Free`: the second option
+is [`LICENSE-ROYALTY-FREE.md`](LICENSE-ROYALTY-FREE.md). Each package ships
+both texts (`LICENSE` and `LICENSE-ROYALTY-FREE.md` are symlinks to the
+repository root files).

@@ -26,6 +26,21 @@ on:
         options:
           - file-backup
           - change-preview
+          - agent-ext
+          - agent-host-config
+          - agent-loop
+          - config-schema
+          - llm-catalog
+          - llm-http
+          - llm-wire
+          - llm-wire-anthropic
+          - llm-wire-openai
+          - mcp-client-host
+          - perm-rules
+          - proc-sandbox
+          - shell-classify
+          - speech-capture
+          - text-sanitize
       dry-run:
         description: open the version pull request and wait for its checks, then close it
         default: false

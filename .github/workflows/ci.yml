@@ -64,6 +64,5 @@ jobs:
       test-command: |
         cargo test --workspace --locked
         if [ "$TARGET" = x86_64-unknown-linux-gnu ]; then
-          cargo publish --dry-run -p file-backup --locked
-          cargo publish --dry-run -p change-preview --locked
+          cargo publish --dry-run --workspace --locked
         fi
