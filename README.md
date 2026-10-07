@@ -23,6 +23,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | [`scoped-check`](scoped-check) | Run only the check commands a change touches (binary) |
 | [`shell-classify`](shell-classify) | Rate a bash command line `ReadOnly`/`Write`/`Exec`/`Destructive` and list the simple commands it runs (not published yet) |
 | [`text-sanitize`](text-sanitize) | Make untrusted text safe to print: strips terminal escapes, control characters, bidi overrides and invisibles |
+| [`speech-capture`](speech-capture) | Microphone capture, audio decode, 16 kHz resampling and an energy VAD for speech-to-text, optional whisper.cpp (not published yet) |
 
 ## Commands
 
