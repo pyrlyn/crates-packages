@@ -1,5 +1,5 @@
 [workspace]
-members = ["agent-loop", "cargo-changed-packages", "change-preview", "file-backup", "git-changed-paths", "llm-anthropic", "llm-catalog", "llm-http", "llm-openai", "llm-wire", "path-gates", "perm-rules", "proc-sandbox", "scoped-check", "shell-classify", "text-sanitize"]
+members = ["agent-loop", "cargo-changed-packages", "change-preview", "file-backup", "git-changed-paths", "llm-anthropic", "llm-catalog", "llm-http", "llm-openai", "llm-wire", "mcp-host", "path-gates", "perm-rules", "proc-sandbox", "scoped-check", "shell-classify", "text-sanitize"]
 resolver = "2"
 
 [workspace.package]

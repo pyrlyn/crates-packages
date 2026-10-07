@@ -16,6 +16,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | [`llm-http`](llm-http) | HTTP plumbing for LLM provider wires: credential lookup, auth headers, error mapping, retry with backoff, SSE framing |
 | [`llm-openai`](llm-openai) | OpenAI Chat Completions and Responses wires, also for every OpenAI-compatible endpoint |
 | [`llm-wire`](llm-wire) | Provider contract and neutral request, event and tool types for LLM backends (unpublished) |
+| [`mcp-host`](mcp-host) | MCP client host over rmcp: `.mcp.json` discovery, fail-open connect, OAuth with an injectable token store, elicitation, deferred tools |
 | [`path-gates`](path-gates) | Map changed paths to named gates by glob rules from a TOML config |
 | [`perm-rules`](perm-rules) | Permission rules for tool calls: `Tool(subject)` grammar, deny/allow/ask decision order, risk fallback |
 | [`proc-sandbox`](proc-sandbox) | Confine a child process: Seatbelt on macOS, bubblewrap or Landlock plus seccomp on Linux, and a path guard for workspace roots |
