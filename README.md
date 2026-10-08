@@ -7,6 +7,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | Crate | What it does |
 | --- | --- |
 | [`cargo-changed-packages`](cargo-changed-packages) | Workspace packages a set of changed paths affects, including reverse dependencies |
+| [`layered-config`](layered-config) | Ordered TOML layers; a later layer wins, and each leaf records which layer set it |
 | [`change-preview`](change-preview) | Preview what a command would change: diff or `--stat` of edits, size and file count of removals, totals |
 | [`file-backup`](file-backup) | Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it |
 | [`git-changed-paths`](git-changed-paths) | Paths a git working tree changed relative to a base ref |
