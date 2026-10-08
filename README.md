@@ -35,6 +35,9 @@ cargo fmt --all -- --check
   Anything failing before the merge closes the pull request: no tag, no
   release. `-f dry-run=true` opens the pull request, waits for its checks and
   closes it.
+- On crates.io: `file-backup`. `change-preview` is publish-ready (CI runs its
+  publish dry-run) and goes out with its first bump. The other four crates are
+  not published yet.
 
 Secrets: `CARGO_REGISTRY_TOKEN` (crates.io API token) and
 `RELEASE_PLZ_TOKEN` (a PAT that can trigger workflows; bump opens the
