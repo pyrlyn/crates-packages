@@ -1,0 +1,15 @@
+[package]
+name = "gettext-catalog"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.86"
+description = "Load a gettext .po catalog and select a plural form"
+license.workspace = true
+repository = "https://github.com/pyrlyn/crates-packages"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[dependencies]
+polib = "0.3"
+thiserror = "2"

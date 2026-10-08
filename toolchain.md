@@ -19,7 +19,9 @@ Direct dependencies of the workspace members. Path crates are this repo.
 | --- | --- | --- | --- |
 | cargo-changed-packages | local | https://github.com/pyrlyn/crates-packages | Affected workspace packages |
 | file-backup | local | https://github.com/pyrlyn/crates-packages | Sibling `.bak-<unix-seconds>` copies |
+| gettext-catalog | local | https://github.com/pyrlyn/crates-packages | `.po` catalog loader and plural selection |
 | git-changed-paths | local | https://github.com/pyrlyn/crates-packages | Change set against a base ref |
+| polib | local | https://github.com/brettdong/polib | Reads `.po` files for `gettext-catalog` |
 | layered-config | local | https://github.com/pyrlyn/crates-packages | Ordered TOML layers with per-leaf provenance |
 | secret-store | local | https://github.com/pyrlyn/crates-packages | Environment, then an injected credential store |
 | telemetry-setup | local | https://github.com/pyrlyn/crates-packages | Tracing setup that redacts secrets before storage |
