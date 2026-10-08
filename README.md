@@ -15,6 +15,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | [`llm-testkit`](llm-testkit) | Replay cassettes with secret redaction |
 | [`llm-wire`](llm-wire) | Provider-neutral chat messages and server-sent events |
 | [`secret-store`](secret-store) | Environment, then an injected credential store; tests use memory |
+| [`sqlite-change-feed`](sqlite-change-feed) | `PRAGMA data_version` poller for commits from another connection |
 | [`telemetry-setup`](telemetry-setup) | Tracing setup that redacts secrets; no OTLP export |
 | [`text-sanitize`](text-sanitize) | Strip escape sequences and header injection from untrusted text |
 | [`change-preview`](change-preview) | Preview what a command would change: diff or `--stat` of edits, size and file count of removals, totals |

@@ -39,6 +39,8 @@ Direct dependencies of the workspace members. Path crates are this repo.
 | keyring | local | https://crates.io/crates/keyring | Optional `os` feature of `secret-store`; tests leave it off |
 | path-gates | local | https://github.com/pyrlyn/crates-packages | Changed paths to gates |
 | scoped-check | local | https://github.com/pyrlyn/crates-packages | Check commands for a change |
+| sqlite-change-feed | local | https://github.com/pyrlyn/crates-packages | `PRAGMA data_version` change feed |
+| diesel | local | https://github.com/diesel-rs/diesel | SQLite connection for `sqlite-change-feed`; PRAGMA stays in `sql_query` because Diesel cannot model it |
 | anyhow | local | https://github.com/dtolnay/anyhow | Top-level errors of `scoped-check` |
 | assert_cmd | local | https://github.com/assert-rs/assert_cmd | Tests that run the `scoped-check` binary |
 | clap | local | https://github.com/clap-rs/clap | `scoped-check` CLI |

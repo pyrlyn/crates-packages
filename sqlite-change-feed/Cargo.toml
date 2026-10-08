@@ -1,0 +1,18 @@
+[package]
+name = "sqlite-change-feed"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.86"
+description = "Notice commits from another SQLite connection via PRAGMA data_version"
+license.workspace = true
+repository = "https://github.com/pyrlyn/crates-packages"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[dependencies]
+diesel = { version = "2.2", features = ["sqlite"] }
+thiserror = "2"
+
+[dev-dependencies]
+tempfile = "3"
