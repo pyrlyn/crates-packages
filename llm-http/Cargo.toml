@@ -1,0 +1,14 @@
+[package]
+name = "llm-http"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.86"
+description = "JSON HTTP calls through an injected transport, with retry"
+license.workspace = true
+repository = "https://github.com/pyrlyn/crates-packages"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[dependencies]
+thiserror = "2"

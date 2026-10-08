@@ -8,6 +8,8 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | --- | --- |
 | [`cargo-changed-packages`](cargo-changed-packages) | Workspace packages a set of changed paths affects, including reverse dependencies |
 | [`layered-config`](layered-config) | Ordered TOML layers; a later layer wins, and each leaf records which layer set it |
+| [`llm-http`](llm-http) | JSON HTTP through an injected transport, with retry and no sockets |
+| [`llm-wire`](llm-wire) | Provider-neutral chat messages and server-sent events |
 | [`secret-store`](secret-store) | Environment, then an injected credential store; tests use memory |
 | [`telemetry-setup`](telemetry-setup) | Tracing setup that redacts secrets; no OTLP export |
 | [`change-preview`](change-preview) | Preview what a command would change: diff or `--stat` of edits, size and file count of removals, totals |

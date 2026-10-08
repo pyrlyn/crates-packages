@@ -1,0 +1,15 @@
+[package]
+name = "llm-wire"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.86"
+description = "Provider-neutral chat messages and server-sent events"
+license.workspace = true
+repository = "https://github.com/pyrlyn/crates-packages"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+thiserror = "2"
