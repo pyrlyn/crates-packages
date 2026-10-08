@@ -24,6 +24,7 @@ Direct dependencies of the workspace members. Path crates are this repo.
 | polib | local | https://github.com/brettdong/polib | Reads `.po` files for `gettext-catalog` |
 | layered-config | local | https://github.com/pyrlyn/crates-packages | Ordered TOML layers with per-leaf provenance |
 | llm-http | local | https://github.com/pyrlyn/crates-packages | Injected HTTP transport and retry; no sockets |
+| llm-openai | local | https://github.com/pyrlyn/crates-packages | OpenAI chat completions on `llm-http` |
 | llm-wire | local | https://github.com/pyrlyn/crates-packages | Provider-neutral chat messages and SSE frames |
 | secret-store | local | https://github.com/pyrlyn/crates-packages | Environment, then an injected credential store |
 | telemetry-setup | local | https://github.com/pyrlyn/crates-packages | Tracing setup that redacts secrets before storage |

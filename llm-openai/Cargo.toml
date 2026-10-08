@@ -1,0 +1,18 @@
+[package]
+name = "llm-openai"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.86"
+description = "OpenAI chat completions through an injected HTTP transport"
+license.workspace = true
+repository = "https://github.com/pyrlyn/crates-packages"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[dependencies]
+llm-http = { path = "../llm-http" }
+llm-wire = { path = "../llm-wire" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"

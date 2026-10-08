@@ -1096,6 +1096,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "llm-openai"
+version = "0.1.0"
+dependencies = [
+ "llm-http",
+ "llm-wire",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "llm-wire"
 version = "0.1.0"
 dependencies = [
