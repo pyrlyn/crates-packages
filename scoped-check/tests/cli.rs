@@ -113,7 +113,7 @@ fn docs_only_change_runs_only_the_docs_gate() {
     let out = stdout_of(repo.path(), &["run"]);
     assert!(out.contains("== docs: echo docs README.md"), "{out}");
     assert!(out.contains("docs README.md\n"), "{out}");
-    assert!(!out.contains("== test"), "{out}");
+    assert!(!out.contains("== test: echo"), "{out}");
 }
 
 #[test]
@@ -125,7 +125,7 @@ fn change_in_b_selects_b_and_its_dependent() {
         out.contains("test -p a -p b -E 'package(=a) | package(=b)'"),
         "{out}"
     );
-    assert!(!out.contains("== docs"), "{out}");
+    assert!(!out.contains("== docs: echo"), "{out}");
 }
 
 #[test]
@@ -173,7 +173,7 @@ fn unknown_base_warns_and_runs_everything() {
 fn all_flag_ignores_the_change_set() {
     let repo = fixture(CONFIG);
     let out = stdout_of(repo.path(), &["plan", "--all"]);
-    assert!(out.contains("gate docs [--all]: echo docs \n"), "{out}");
+    assert!(out.contains("gate docs [--all]: echo docs .\n"), "{out}");
     assert!(
         out.contains("gate test [--all]: echo test --workspace \n"),
         "{out}"
@@ -248,7 +248,15 @@ fn plan_json_has_the_documented_shape() {
             .unwrap()
             .contains("-p a -p b")
     );
-    assert_eq!(json["skipped"], serde_json::json!([]));
+    assert_eq!(json["unmatched"], serde_json::json!([]));
+    let skipped: Vec<&str> = json["skipped"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|s| s["name"].as_str().unwrap())
+        .collect();
+    assert!(skipped.contains(&"docs"), "{json}");
+    assert!(skipped.contains(&"boom"), "{json}");
 }
 
 #[test]
@@ -279,4 +287,49 @@ fn shell_braces_stay_literal() {
     write(repo.path(), "README.md", "# changed\n");
     let out = stdout_of(repo.path(), &["plan", "--base", "main"]);
     assert!(out.contains("echo ${HOME:+set} {a,b}"), "{out}");
+}
+
+#[test]
+fn config_outside_the_repo_still_uses_the_work_tree() {
+    let repo = fixture(CONFIG);
+    write(repo.path(), "README.md", "# changed\n");
+    let outside = TempDir::new().unwrap();
+    fs::copy(
+        repo.path().join("scoped-check.toml"),
+        outside.path().join("scoped-check.toml"),
+    )
+    .unwrap();
+    let cfg = outside.path().join("scoped-check.toml");
+    let out = stdout_of(repo.path(), &["plan", "--config", cfg.to_str().unwrap()]);
+    assert!(
+        out.contains("gate docs [scoped]: echo docs README.md"),
+        "{out}"
+    );
+}
+
+#[test]
+fn ignored_unmatched_paths_are_listed_and_dead_gates_are_skipped() {
+    let config = r#"
+base = "main"
+unmatched = "ignore"
+
+[[gate]]
+name = "docs"
+paths = ["**/*.md"]
+run = "echo docs {changed}"
+
+[[gate]]
+name = "dead"
+paths = ["**/*.never"]
+run = "echo dead"
+"#;
+    let repo = fixture(config);
+    write(repo.path(), "README.md", "# changed\n");
+    write(repo.path(), "blob.bin", "x");
+    let json: serde_json::Value =
+        serde_json::from_str(&stdout_of(repo.path(), &["plan", "--json"])).unwrap();
+    assert_eq!(json["unmatched"], serde_json::json!(["blob.bin"]));
+    assert_eq!(json["gates"][0]["name"], "docs");
+    assert_eq!(json["skipped"][0]["name"], "dead");
+    assert_eq!(json["skipped"][0]["reason"], "not selected");
 }

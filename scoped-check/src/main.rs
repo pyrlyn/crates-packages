@@ -3,7 +3,7 @@
 mod config;
 mod plan;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode};
 
 use anyhow::Result;
@@ -68,11 +68,12 @@ fn run(cli: Cli) -> Result<ExitCode> {
         Cmd::Run { common, keep_going } => (common, false, keep_going, true),
     };
     let cfg = Config::load(&common.config.unwrap_or_else(default_config))?;
+    let repo = repo_top();
     let base = common
         .base
         .or_else(|| cfg.base.clone())
         .unwrap_or_else(|| DEFAULT_BASE.to_owned());
-    let plan = plan::build(&cfg, &base, common.all);
+    let plan = plan::build(&cfg, &repo, &base, common.all);
     if json {
         println!("{}", serde_json::to_string_pretty(&plan)?);
         return Ok(ExitCode::SUCCESS);
@@ -82,7 +83,7 @@ fn run(cli: Cli) -> Result<ExitCode> {
         return Ok(ExitCode::SUCCESS);
     }
     Ok(if execute {
-        execute_plan(&cfg, &plan, keep_going)
+        execute_plan(&repo, &plan, keep_going)
     } else {
         print_plan(&plan);
         ExitCode::SUCCESS
@@ -92,14 +93,13 @@ fn run(cli: Cli) -> Result<ExitCode> {
 fn default_config() -> PathBuf {
     // Outside git the current directory is the best guess; the change set then fails and
     // every gate runs.
-    let top = Command::new("git")
-        .args(["rev-parse", "--show-toplevel"])
-        .output()
-        .ok()
-        .filter(|o| o.status.success())
-        .and_then(|o| String::from_utf8(o.stdout).ok())
-        .map(|s| PathBuf::from(s.trim_end_matches('\n')));
-    top.unwrap_or_default().join("scoped-check.toml")
+    git_changed_paths::toplevel(Path::new("."))
+        .unwrap_or_else(|_| PathBuf::new())
+        .join("scoped-check.toml")
+}
+
+fn repo_top() -> PathBuf {
+    git_changed_paths::toplevel(Path::new(".")).unwrap_or_else(|_| PathBuf::from("."))
 }
 
 fn print_plan(plan: &Plan) {
@@ -112,6 +112,9 @@ fn print_plan(plan: &Plan) {
         Some(n) => println!("changed paths: {n}"),
         None => println!("changed paths: unknown"),
     }
+    for path in &plan.unmatched {
+        println!("unmatched: {path}");
+    }
     for step in &plan.gates {
         println!("gate {} [{}]: {}", step.name, step.why, step.command);
     }
@@ -120,14 +123,14 @@ fn print_plan(plan: &Plan) {
     }
 }
 
-fn execute_plan(cfg: &Config, plan: &Plan, keep_going: bool) -> ExitCode {
+fn execute_plan(repo: &Path, plan: &Plan, keep_going: bool) -> ExitCode {
     for skip in &plan.skipped {
         println!("== {}: skipped, {}", skip.name, skip.reason);
     }
     let mut first_failure = None;
     for step in &plan.gates {
         println!("== {}: {}", step.name, step.command);
-        let code = shell(&step.command, cfg).unwrap_or_else(|e| {
+        let code = shell(&step.command, repo).unwrap_or_else(|e| {
             eprintln!("scoped-check: cannot start `{}`: {e}", step.name);
             1
         });
@@ -142,7 +145,7 @@ fn execute_plan(cfg: &Config, plan: &Plan, keep_going: bool) -> ExitCode {
 }
 
 /// Exit code of `command` under the platform shell; 1 when it has none (killed by a signal).
-fn shell(command: &str, cfg: &Config) -> std::io::Result<u8> {
+fn shell(command: &str, repo: &Path) -> std::io::Result<u8> {
     let (program, flag) = if cfg!(windows) {
         ("cmd", "/C")
     } else {
@@ -151,7 +154,7 @@ fn shell(command: &str, cfg: &Config) -> std::io::Result<u8> {
     let status = Command::new(program)
         .arg(flag)
         .arg(command)
-        .current_dir(&cfg.dir)
+        .current_dir(repo)
         .status()?;
     Ok(status.code().map_or(1, |c| u8::try_from(c).unwrap_or(1)))
 }

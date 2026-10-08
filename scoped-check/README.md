@@ -15,7 +15,7 @@ scoped-check run    # run it
 ```toml
 base = "origin/main"   # default; --base overrides
 unmatched = "all"      # path-gates key: a path no gate claims selects every gate
-workspace = "."        # cargo workspace root, relative to this file
+workspace = "."        # cargo workspace root, relative to the git top
 
 [[gate]]
 name = "fmt"
@@ -34,7 +34,8 @@ run = "just docs-check"
 ```
 
 `paths`, `always` and `unmatched` are read by [`path-gates`](../path-gates). `run` is
-executed with `sh -c` (`cmd /C` on Windows) from the config file's directory. A gate
+executed with `sh -c` (`cmd /C` on Windows) from the git top of the current directory,
+not from the config file's directory. `--config` may sit outside the repo. A gate
 without `run`, or a `run` with an unknown `{placeholder}`, is a config error (exit 2).
 Only `{identifier}` is a placeholder; `${VAR}`, `awk '{print}'` and `{a,b}` stay literal.
 
@@ -42,10 +43,12 @@ Only `{identifier}` is a placeholder; `${VAR}`, `awk '{print}'` and `{a,b}` stay
 | --- | --- | --- |
 | `{packages}` | `-p a -p b` (sorted, affected packages incl. reverse dependencies) | `--workspace` |
 | `{nextest_filter}` | `-E 'package(=a) \| package(=b)'` | empty |
-| `{changed}` | the paths the gate claims, shell-quoted | empty |
+| `{changed}` | the paths the gate claims, quoted for the platform shell | `.` |
 
-Values are POSIX shell-quoted, so avoid `{changed}` on Windows. A gate using `{packages}` or
+Values are POSIX-quoted on Unix and cmd.exe-quoted on Windows. A gate using `{packages}` or
 `{nextest_filter}` whose affected set is empty is skipped: nothing it covers changed.
+A gate the change set did not select is listed as `skip <name>: not selected`. Paths
+dropped by `unmatched = "ignore"` are listed as `unmatched:`.
 
 ## Commands
 
@@ -73,8 +76,9 @@ paths prints `nothing changed against <base>` and exits 0. A config error or bad
   "merge_base": "<sha>",
   "changed": 3,
   "nothing_changed": false,
+  "unmatched": [],
   "gates": [{ "name": "test", "command": "cargo nextest run -p a -p b ...", "why": "scoped" }],
-  "skipped": [{ "name": "docs", "reason": "nothing it covers changed" }]
+  "skipped": [{ "name": "docs", "reason": "not selected" }]
 }
 ```
 

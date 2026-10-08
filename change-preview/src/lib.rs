@@ -212,7 +212,8 @@ pub fn unified_diff(path: &Path, before: &str, after: &str) -> String {
 /// file headers. owo-colors decides per stream (tty, `NO_COLOR`, `CLICOLOR`, `TERM=dumb`), so
 /// a piped run stays plain. Lines with no marker pass through.
 pub fn paint(text: &str) -> String {
-    text.lines()
+    let mut out = text
+        .lines()
         .map(|line| {
             if line.starts_with("+++") || line.starts_with("---") {
                 line.if_supports_color(Stream::Stdout, |t| t.bold())
@@ -231,7 +232,11 @@ pub fn paint(text: &str) -> String {
             }
         })
         .collect::<Vec<_>>()
-        .join("\n")
+        .join("\n");
+    if text.ends_with('\n') && !out.ends_with('\n') {
+        out.push('\n');
+    }
+    out
 }
 
 /// `1023 B`, `1.0 KB`, `1.5 MB`: one decimal past bytes, binary units.
@@ -381,6 +386,8 @@ mod tests {
         // Piped test output is not a terminal, so owo-colors leaves the text alone.
         let text = "--- a/x\n+++ b/x\n@@ -1 +1 @@\n-a\n+b\n1 file changed";
         assert_eq!(paint(text), text);
+        let with_nl = "1 file changed\n";
+        assert_eq!(paint(with_nl), with_nl);
     }
 
     #[test]

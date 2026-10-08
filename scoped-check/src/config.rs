@@ -1,21 +1,21 @@
 //! `scoped-check.toml`: this tool's own keys, parsed once, next to the gate rules that
-//! `path-gates` compiles from the same text.
+//! `path-gates` compiles from the same tables.
 
 use std::path::{Component, Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
-use path_gates::Rules;
+use path_gates::{GateSpec, Rules, Unmatched};
 use serde::Deserialize;
 
 /// Base ref used when neither `--base` nor the config names one.
 pub const DEFAULT_BASE: &str = "origin/main";
 
-// Unknown keys stay allowed: `paths`, `always` and `unmatched` belong to `path-gates`, which
-// reads the same text.
 #[derive(Deserialize)]
 struct Raw {
     base: Option<String>,
     workspace: Option<PathBuf>,
+    #[serde(default)]
+    unmatched: Unmatched,
     #[serde(default)]
     gate: Vec<RawGate>,
 }
@@ -24,6 +24,10 @@ struct Raw {
 struct RawGate {
     name: String,
     run: Option<String>,
+    #[serde(default)]
+    paths: Vec<String>,
+    #[serde(default)]
+    always: bool,
 }
 
 /// One piece of a gate's `run` template.
@@ -51,10 +55,8 @@ impl Gate {
 
 /// The parsed configuration.
 pub struct Config {
-    /// Directory holding the config file; commands run here and it is the repository top.
-    pub dir: PathBuf,
     pub base: Option<String>,
-    /// Cargo workspace root, relative to [`dir`](Self::dir); empty for the directory itself.
+    /// Cargo workspace root, relative to the git top; empty for the repository itself.
     pub workspace: PathBuf,
     pub rules: Rules,
     /// Gates in config order.
@@ -66,14 +68,19 @@ impl Config {
     pub fn load(path: &Path) -> Result<Self> {
         let text = std::fs::read_to_string(path)
             .with_context(|| format!("cannot read config {}", path.display()))?;
-        Self::parse(&text, path).with_context(|| format!("invalid config {}", path.display()))
+        Self::parse(&text).with_context(|| format!("invalid config {}", path.display()))
     }
 
-    fn parse(text: &str, path: &Path) -> Result<Self> {
+    fn parse(text: &str) -> Result<Self> {
         let raw: Raw = toml::from_str(text)?;
-        let rules = Rules::from_toml(text)?;
-        let mut gates = Vec::new();
+        let mut specs = Vec::with_capacity(raw.gate.len());
+        let mut gates = Vec::with_capacity(raw.gate.len());
         for gate in raw.gate {
+            specs.push(GateSpec {
+                name: gate.name.clone(),
+                paths: gate.paths,
+                always: gate.always,
+            });
             let Some(run) = gate.run else {
                 bail!("gate `{}` has no `run`", gate.name);
             };
@@ -83,6 +90,7 @@ impl Config {
                 run,
             });
         }
+        let rules = Rules::new(specs, raw.unmatched)?;
         // `.` components are dropped so the empty path means "the repository top" and
         // `strip_prefix` works on it.
         let mut workspace = PathBuf::new();
@@ -93,12 +101,7 @@ impl Config {
                 _ => bail!("`workspace` must be a relative path inside the repository"),
             }
         }
-        let dir = match path.parent() {
-            Some(p) if !p.as_os_str().is_empty() => p.to_path_buf(),
-            _ => PathBuf::from("."),
-        };
         Ok(Self {
-            dir,
             base: raw.base,
             workspace,
             rules,
