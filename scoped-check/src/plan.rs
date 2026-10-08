@@ -1,7 +1,7 @@
 //! Turns the change set into the commands to run, falling back to "everything" whenever
 //! the exact answer is out of reach.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use cargo_changed_packages::Affected;
 use path_gates::Selection;
@@ -18,7 +18,7 @@ pub struct Step {
     pub why: String,
 }
 
-/// A selected gate that has nothing to do.
+/// A selected gate that has nothing to do, or a gate the change set did not select.
 #[derive(Serialize)]
 pub struct Skip {
     pub name: String,
@@ -33,6 +33,8 @@ pub struct Plan {
     /// `None` when the change set could not be computed.
     pub changed: Option<usize>,
     pub nothing_changed: bool,
+    /// Paths no gate claimed, in input order. Empty unless `unmatched = "ignore"`.
+    pub unmatched: Vec<String>,
     pub gates: Vec<Step>,
     pub skipped: Vec<Skip>,
 }
@@ -44,18 +46,19 @@ struct Values {
 }
 
 /// Plan the gates for `base`. Never returns "nothing to do" because of an error.
-pub fn build(cfg: &Config, base: &str, all: bool) -> Plan {
+pub fn build(cfg: &Config, repo: &Path, base: &str, all: bool) -> Plan {
     let mut plan = Plan {
         base: base.to_owned(),
         merge_base: None,
         changed: None,
         nothing_changed: false,
+        unmatched: Vec::new(),
         gates: Vec::new(),
         skipped: Vec::new(),
     };
     let mut forced = all.then(|| "--all".to_owned());
     let mut paths = Vec::new();
-    match git_changed_paths::changed_paths(&cfg.dir, base) {
+    match git_changed_paths::changed_paths(repo, base) {
         Ok(found) => {
             plan.merge_base = Some(found.merge_base);
             paths = found.paths.into_iter().collect::<Vec<_>>();
@@ -69,11 +72,12 @@ pub fn build(cfg: &Config, base: &str, all: bool) -> Plan {
             return plan;
         }
         let selection = cfg.rules.select(&paths);
+        plan.unmatched = unmatched_names(&selection);
         if selection.all {
             let first = selection.unmatched.first().map(|p| p.display().to_string());
             forced = Some(format!("all: unmatched {}", first.unwrap_or_default()));
         } else {
-            match scoped(cfg, &paths, &selection) {
+            match scoped(cfg, repo, &paths, &selection) {
                 Ok((gates, skipped)) => {
                     plan.gates = gates;
                     plan.skipped = skipped;
@@ -87,10 +91,20 @@ pub fn build(cfg: &Config, base: &str, all: bool) -> Plan {
     let full = Values {
         packages: "--workspace".to_owned(),
         filter: String::new(),
-        changed: String::new(),
+        // `.` is the path analog of `--workspace`: tools that take files scan the tree
+        // instead of running on an empty argv and passing.
+        changed: ".".to_owned(),
     };
     plan.gates = cfg.gates.iter().map(|g| step(g, &full, &why)).collect();
     plan
+}
+
+fn unmatched_names(selection: &Selection) -> Vec<String> {
+    selection
+        .unmatched
+        .iter()
+        .map(|p| p.display().to_string())
+        .collect()
 }
 
 fn fall_back(error: &dyn std::fmt::Display) -> Option<String> {
@@ -119,13 +133,21 @@ fn step(gate: &Gate, values: &Values, why: &str) -> Step {
 
 type Scoped = (Vec<Step>, Vec<Skip>);
 
-fn scoped(cfg: &Config, paths: &[PathBuf], selection: &Selection) -> Result<Scoped, String> {
+fn scoped(
+    cfg: &Config,
+    repo: &Path,
+    paths: &[PathBuf],
+    selection: &Selection,
+) -> Result<Scoped, String> {
     let (mut steps, mut skipped) = (Vec::new(), Vec::new());
-    for gate in cfg
-        .gates
-        .iter()
-        .filter(|g| selection.gates.contains(&g.name))
-    {
+    for gate in &cfg.gates {
+        if !selection.gates.contains(&gate.name) {
+            skipped.push(Skip {
+                name: gate.name.clone(),
+                reason: "not selected".to_owned(),
+            });
+            continue;
+        }
         // Selecting each path alone is how a gate learns which paths it claims.
         let claimed: Vec<&PathBuf> = paths
             .iter()
@@ -136,11 +158,10 @@ fn scoped(cfg: &Config, paths: &[PathBuf], selection: &Selection) -> Result<Scop
         let mut values = Values {
             packages: String::new(),
             filter: String::new(),
-            changed: shlex::try_join(words)
-                .map_err(|e| format!("cannot quote a changed path: {e}"))?,
+            changed: join_words(&words)?,
         };
         if gate.needs_packages() {
-            let affected = affected(cfg, &claimed)?;
+            let affected = affected(cfg, repo, &claimed)?;
             if !affected.all && affected.packages.is_empty() {
                 skipped.push(Skip {
                     name: gate.name.clone(),
@@ -151,10 +172,13 @@ fn scoped(cfg: &Config, paths: &[PathBuf], selection: &Selection) -> Result<Scop
             match affected.nextest_filter() {
                 None => values.packages = "--workspace".to_owned(),
                 Some(filter) => {
-                    let flags = affected.packages.iter().flat_map(|p| ["-p", p.as_str()]);
-                    values.packages = shlex::try_join(flags).map_err(|e| e.to_string())?;
-                    let quoted = shlex::try_quote(&filter).map_err(|e| e.to_string())?;
-                    values.filter = format!("-E {quoted}");
+                    let flags: Vec<&str> = affected
+                        .packages
+                        .iter()
+                        .flat_map(|p| ["-p", p.as_str()])
+                        .collect();
+                    values.packages = join_words(&flags)?;
+                    values.filter = format!("-E {}", quote_one(&filter)?);
                 }
             }
         }
@@ -163,7 +187,7 @@ fn scoped(cfg: &Config, paths: &[PathBuf], selection: &Selection) -> Result<Scop
     Ok((steps, skipped))
 }
 
-fn affected(cfg: &Config, claimed: &[&PathBuf]) -> Result<Affected, String> {
+fn affected(cfg: &Config, repo: &Path, claimed: &[&PathBuf]) -> Result<Affected, String> {
     // Changed paths are repo-relative; the cargo library wants them relative to the
     // workspace, so those outside it cannot affect its packages.
     let relative: Vec<PathBuf> = claimed
@@ -171,6 +195,63 @@ fn affected(cfg: &Config, claimed: &[&PathBuf]) -> Result<Affected, String> {
         .filter_map(|p| p.strip_prefix(&cfg.workspace).ok())
         .map(PathBuf::from)
         .collect();
-    cargo_changed_packages::affected(&cfg.dir.join(&cfg.workspace), &relative)
+    cargo_changed_packages::affected(&repo.join(&cfg.workspace), &relative)
         .map_err(|e| e.to_string())
+}
+
+fn join_words(words: &[&str]) -> Result<String, String> {
+    if cfg!(windows) {
+        Ok(words
+            .iter()
+            .copied()
+            .map(quote_cmd)
+            .collect::<Vec<_>>()
+            .join(" "))
+    } else {
+        shlex::try_join(words.iter().copied())
+            .map_err(|e| format!("cannot quote a changed path: {e}"))
+    }
+}
+
+fn quote_one(word: &str) -> Result<String, String> {
+    if cfg!(windows) {
+        Ok(quote_cmd(word))
+    } else {
+        shlex::try_quote(word)
+            .map(|s| s.into_owned())
+            .map_err(|e| e.to_string())
+    }
+}
+
+/// cmd.exe quoting: double quotes, with inner quotes doubled. Metacharacters
+/// outside quotes (`&`, `|`, `>`, …) would otherwise start another command.
+fn quote_cmd(s: &str) -> String {
+    if s.is_empty() {
+        return "\"\"".to_owned();
+    }
+    let special = |c: char| {
+        c.is_ascii_whitespace()
+            || matches!(
+                c,
+                '&' | '|' | '<' | '>' | '^' | '%' | '"' | ',' | ';' | '(' | ')' | '!' | '\''
+            )
+    };
+    if !s.chars().any(special) {
+        return s.to_owned();
+    }
+    format!("\"{}\"", s.replace('"', "\"\""))
+}
+
+#[cfg(test)]
+mod quote_tests {
+    use super::quote_cmd;
+
+    #[test]
+    fn quote_cmd_wraps_metacharacters() {
+        assert_eq!(quote_cmd("a.txt"), "a.txt");
+        assert_eq!(quote_cmd("my file.rs"), "\"my file.rs\"");
+        assert_eq!(quote_cmd("foo&bar.rs"), "\"foo&bar.rs\"");
+        assert_eq!(quote_cmd("x|whoami"), "\"x|whoami\"");
+        assert_eq!(quote_cmd("a\"b"), "\"a\"\"b\"");
+    }
 }

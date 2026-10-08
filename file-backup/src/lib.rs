@@ -8,7 +8,8 @@
 //! file, or a sibling `.bak-*` that already holds the same bytes, is `Ok(None)`
 //! — a second reset or setup must not grow a stack of identical undos.
 
-use std::fs;
+use std::fs::{self, OpenOptions};
+use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -17,8 +18,10 @@ use std::time::{SystemTime, UNIX_EPOCH};
 /// `None` when there is no file yet, or when a `<name>.bak-*` sibling already
 /// holds the same bytes.
 pub fn backup(path: &Path) -> std::io::Result<Option<PathBuf>> {
-    if !path.exists() {
-        return Ok(None);
+    match fs::symlink_metadata(path) {
+        Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(None),
+        Err(e) => return Err(e),
+        Ok(_) => {}
     }
     let ts = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -30,24 +33,40 @@ pub fn backup(path: &Path) -> std::io::Result<Option<PathBuf>> {
 /// [`backup`] with the clock passed in, so a test can pin the second.
 pub fn backup_at(path: &Path, ts: u64) -> std::io::Result<Option<PathBuf>> {
     let name = path.file_name().unwrap_or_default().to_string_lossy();
+    let src_meta = fs::symlink_metadata(path)?;
     let body = fs::read(path)?;
-    if identical_backup_exists(path, &name, &body) {
+    if identical_backup_exists(path, &src_meta, &name, &body) {
         return Ok(None);
     }
-    // Two commands inside one second would otherwise share a name and the
-    // first copy would go.
+    let perm = fs::metadata(path)?.permissions();
+    // `create_new` is O_EXCL: a planted symlink (dangling or live) makes the
+    // open fail instead of following it, and two processes cannot share a name.
     let mut n = 0u32;
-    let mut bak = path.with_file_name(format!("{name}.bak-{ts}"));
-    while bak.exists() {
-        n += 1;
-        bak = path.with_file_name(format!("{name}.bak-{ts}-{n}"));
+    loop {
+        let bak = if n == 0 {
+            path.with_file_name(format!("{name}.bak-{ts}"))
+        } else {
+            path.with_file_name(format!("{name}.bak-{ts}-{n}"))
+        };
+        match OpenOptions::new().write(true).create_new(true).open(&bak) {
+            Ok(mut dest) => {
+                dest.write_all(&body)?;
+                dest.set_permissions(perm)?;
+                return Ok(Some(bak));
+            }
+            Err(e) if e.kind() == io::ErrorKind::AlreadyExists => {
+                n = n
+                    .checked_add(1)
+                    .ok_or_else(|| io::Error::other("too many backup name collisions"))?;
+            }
+            Err(e) => return Err(e),
+        }
     }
-    fs::copy(path, &bak)?;
-    Ok(Some(bak))
 }
 
-/// True when any `<name>.bak-*` beside `path` is byte-equal to `body`.
-fn identical_backup_exists(path: &Path, name: &str, body: &[u8]) -> bool {
+/// True when any distinct regular `<name>.bak-*` beside `path` is byte-equal to
+/// `body`. Symlinks and hard links to `path` are not backups.
+fn identical_backup_exists(path: &Path, src_meta: &fs::Metadata, name: &str, body: &[u8]) -> bool {
     let Some(dir) = path.parent() else {
         return false;
     };
@@ -55,13 +74,39 @@ fn identical_backup_exists(path: &Path, name: &str, body: &[u8]) -> bool {
     let Ok(entries) = fs::read_dir(dir) else {
         return false;
     };
-    entries
-        .filter_map(|e| e.ok())
-        .filter(|e| e.file_name().to_string_lossy().starts_with(&prefix))
-        .any(|e| {
-            e.metadata().is_ok_and(|m| m.len() == body.len() as u64)
-                && fs::read(e.path()).is_ok_and(|b| b == body)
-        })
+    entries.filter_map(|e| e.ok()).any(|e| {
+        if !e.file_name().to_string_lossy().starts_with(&prefix) {
+            return false;
+        }
+        let Ok(meta) = fs::symlink_metadata(e.path()) else {
+            return false;
+        };
+        if meta.file_type().is_symlink() || same_file(src_meta, &meta) {
+            return false;
+        }
+        meta.len() == body.len() as u64 && fs::read(e.path()).is_ok_and(|b| b == body)
+    })
+}
+
+fn same_file(a: &fs::Metadata, b: &fs::Metadata) -> bool {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+        a.dev() == b.dev() && a.ino() == b.ino()
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::MetadataExt;
+        a.volume_serial_number().is_some()
+            && a.volume_serial_number() == b.volume_serial_number()
+            && a.file_index().is_some()
+            && a.file_index() == b.file_index()
+    }
+    #[cfg(not(any(unix, windows)))]
+    {
+        let _ = (a, b);
+        false
+    }
 }
 
 #[cfg(test)]
@@ -143,5 +188,57 @@ mod tests {
         fs::write(dir.join("other.json.bak-1"), "back").unwrap();
         fs::write(&path, "back").unwrap();
         assert!(backup_at(&path, 5).unwrap().is_some(), "prefix is per file");
+    }
+
+    #[cfg(unix)]
+    #[rstest]
+    fn backup_does_not_follow_a_dangling_dest_symlink(tmp: TempDir) {
+        use std::os::unix::fs::symlink;
+        let dir = tmp.path();
+        let src = dir.join("settings.json");
+        fs::write(&src, "PAYLOAD\n").unwrap();
+        let ts = 1_700_000_000u64;
+        let bak = dir.join(format!("settings.json.bak-{ts}"));
+        let victim = dir.join("victim-was-missing");
+        symlink(&victim, &bak).unwrap();
+        let written = backup_at(&src, ts).unwrap().expect("real backup");
+        assert_eq!(
+            written.file_name().unwrap().to_string_lossy(),
+            format!("settings.json.bak-{ts}-1")
+        );
+        assert_eq!(fs::read_to_string(&written).unwrap(), "PAYLOAD\n");
+        assert!(bak.is_symlink(), "planted link must survive");
+        assert!(
+            !victim.exists(),
+            "dangling symlink must not create the target"
+        );
+    }
+
+    #[cfg(unix)]
+    #[rstest]
+    fn backup_does_not_treat_a_hardlink_as_an_identical_copy(tmp: TempDir) {
+        let dir = tmp.path();
+        let src = dir.join("settings.json");
+        fs::write(&src, "same-bytes\n").unwrap();
+        fs::hard_link(&src, dir.join("settings.json.bak-1")).unwrap();
+        let bak = backup_at(&src, 2).unwrap().expect("needs a real copy");
+        assert_eq!(fs::read_to_string(&bak).unwrap(), "same-bytes\n");
+        fs::write(&src, "REPLACED\n").unwrap();
+        assert_eq!(fs::read_to_string(&bak).unwrap(), "same-bytes\n");
+        assert_eq!(
+            fs::read_to_string(dir.join("settings.json.bak-1")).unwrap(),
+            "REPLACED\n",
+            "the original hard link tracks the live file"
+        );
+    }
+
+    #[cfg(unix)]
+    #[rstest]
+    fn backup_errors_on_a_dangling_source_symlink(tmp: TempDir) {
+        use std::os::unix::fs::symlink;
+        let dangling = tmp.path().join("settings.json");
+        symlink(tmp.path().join("nope"), &dangling).unwrap();
+        let err = backup(&dangling).unwrap_err();
+        assert_eq!(err.kind(), io::ErrorKind::NotFound);
     }
 }
