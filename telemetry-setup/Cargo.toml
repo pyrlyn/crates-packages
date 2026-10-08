@@ -1,0 +1,17 @@
+[package]
+name = "telemetry-setup"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.86"
+description = "Tracing setup that redacts secrets before a line is stored"
+license.workspace = true
+repository = "https://github.com/pyrlyn/crates-packages"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[dependencies]
+regex = "1"
+thiserror = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt"] }

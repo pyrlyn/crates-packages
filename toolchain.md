@@ -22,6 +22,10 @@ Direct dependencies of the workspace members. Path crates are this repo.
 | git-changed-paths | local | https://github.com/pyrlyn/crates-packages | Change set against a base ref |
 | layered-config | local | https://github.com/pyrlyn/crates-packages | Ordered TOML layers with per-leaf provenance |
 | secret-store | local | https://github.com/pyrlyn/crates-packages | Environment, then an injected credential store |
+| telemetry-setup | local | https://github.com/pyrlyn/crates-packages | Tracing setup that redacts secrets before storage |
+| regex | local | https://github.com/rust-lang/regex | Secret redaction patterns in `telemetry-setup` |
+| tracing | local | https://github.com/tokio-rs/tracing | Log events for `telemetry-setup` |
+| tracing-subscriber | local | https://github.com/tokio-rs/tracing | Formatter `telemetry-setup` wraps; no OTLP exporter |
 | keyring | local | https://crates.io/crates/keyring | Optional `os` feature of `secret-store`; tests leave it off |
 | path-gates | local | https://github.com/pyrlyn/crates-packages | Changed paths to gates |
 | scoped-check | local | https://github.com/pyrlyn/crates-packages | Check commands for a change |
