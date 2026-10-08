@@ -21,6 +21,8 @@ Direct dependencies of the workspace members. Path crates are this repo.
 | file-backup | local | https://github.com/pyrlyn/crates-packages | Sibling `.bak-<unix-seconds>` copies |
 | git-changed-paths | local | https://github.com/pyrlyn/crates-packages | Change set against a base ref |
 | layered-config | local | https://github.com/pyrlyn/crates-packages | Ordered TOML layers with per-leaf provenance |
+| secret-store | local | https://github.com/pyrlyn/crates-packages | Environment, then an injected credential store |
+| keyring | local | https://crates.io/crates/keyring | Optional `os` feature of `secret-store`; tests leave it off |
 | path-gates | local | https://github.com/pyrlyn/crates-packages | Changed paths to gates |
 | scoped-check | local | https://github.com/pyrlyn/crates-packages | Check commands for a change |
 | anyhow | local | https://github.com/dtolnay/anyhow | Top-level errors of `scoped-check` |

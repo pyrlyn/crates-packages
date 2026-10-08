@@ -1,0 +1,20 @@
+[package]
+name = "secret-store"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.86"
+description = "Resolve a secret from the environment, then from an injected store"
+license.workspace = true
+repository = "https://github.com/pyrlyn/crates-packages"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[features]
+default = []
+# Links the platform credential store. Tests leave this off so they never open it.
+os = ["dep:keyring"]
+
+[dependencies]
+keyring = { version = "4", optional = true, features = ["v1"] }
+thiserror = "2"
