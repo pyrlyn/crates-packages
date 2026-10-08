@@ -1118,6 +1118,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "llm-testkit"
+version = "0.1.0"
+dependencies = [
+ "llm-http",
+ "serde",
+ "serde_json",
+ "telemetry-setup",
+ "thiserror",
+]
+
+[[package]]
 name = "llm-wire"
 version = "0.1.0"
 dependencies = [

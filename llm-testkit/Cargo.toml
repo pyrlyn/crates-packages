@@ -1,0 +1,18 @@
+[package]
+name = "llm-testkit"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.86"
+description = "Replay recorded LLM calls with secrets scrubbed out of the cassette"
+license.workspace = true
+repository = "https://github.com/pyrlyn/crates-packages"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[dependencies]
+llm-http = { path = "../llm-http" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1"
+telemetry-setup = { path = "../telemetry-setup" }
+thiserror = "2"

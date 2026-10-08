@@ -11,6 +11,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | [`llm-anthropic`](llm-anthropic) | Anthropic Messages API through that transport |
 | [`llm-http`](llm-http) | JSON HTTP through an injected transport, with retry and no sockets |
 | [`llm-openai`](llm-openai) | OpenAI chat completions through that transport |
+| [`llm-testkit`](llm-testkit) | Replay cassettes with secret redaction |
 | [`llm-wire`](llm-wire) | Provider-neutral chat messages and server-sent events |
 | [`secret-store`](secret-store) | Environment, then an injected credential store; tests use memory |
 | [`telemetry-setup`](telemetry-setup) | Tracing setup that redacts secrets; no OTLP export |
