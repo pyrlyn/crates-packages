@@ -1,6 +1,8 @@
 [workspace]
-members = ["cargo-changed-packages", "change-preview", "file-backup", "git-changed-paths", "path-gates", "scoped-check"]
+members = ["cargo-changed-packages", "change-preview", "file-backup", "git-changed-paths", "injecta", "injecta-macros", "path-gates", "scoped-check"]
 resolver = "2"
+# A separate, unpublished workspace: benchmarks never enter CI or Cargo.lock.
+exclude = ["injecta/bench"]
 
 [workspace.package]
 license = "GPL-3.0-or-later"
