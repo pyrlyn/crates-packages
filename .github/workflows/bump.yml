@@ -26,6 +26,7 @@ on:
         options:
           - file-backup
           - change-preview
+          - app-home
       dry-run:
         description: open the version pull request and wait for its checks, then close it
         default: false
