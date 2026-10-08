@@ -1,0 +1,14 @@
+- T1. Windows: POSIX quoting handed to cmd.exe in scoped-check
+- T2. `{changed}` silently expands to empty in full mode
+- T3. `--config` outside the repository top mixes path bases
+- T4. file-backup: name-probe race and symlink-following overwrite
+- T5. Error-quality fixes: canonicalize and NotARepository
+- T6. Deduplicate git-toplevel discovery
+- T7. Extract the shared test fixtures
+- T8. Parse the scoped-check config TOML once
+- T9. Robustness batch: dead gates, dropped paths, `./` stripping
+- T10. Fix crate metadata: license mix and repository URL drift
+- T11. atomic-replace: one atomic file write for every project
+- T20.2. wasm-plugin-host: package layout
+- T20.3. wasm-plugin-host: host-function kit
+- T13. app-home: one home, app-home and XDG resolver
