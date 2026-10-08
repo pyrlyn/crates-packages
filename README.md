@@ -16,6 +16,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | [`llm-wire`](llm-wire) | Provider-neutral chat messages and server-sent events |
 | [`secret-store`](secret-store) | Environment, then an injected credential store; tests use memory |
 | [`telemetry-setup`](telemetry-setup) | Tracing setup that redacts secrets; no OTLP export |
+| [`text-sanitize`](text-sanitize) | Strip escape sequences and header injection from untrusted text |
 | [`change-preview`](change-preview) | Preview what a command would change: diff or `--stat` of edits, size and file count of removals, totals |
 | [`file-backup`](file-backup) | Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it |
 | [`gettext-catalog`](gettext-catalog) | Load a `.po` catalog and select a plural form |

@@ -1,0 +1,21 @@
+[package]
+name = "text-sanitize-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+text-sanitize = { path = ".." }
+
+[[bin]]
+name = "plain"
+path = "fuzz_targets/plain.rs"
+test = false
+doc = false
+bench = false
+
+[workspace]

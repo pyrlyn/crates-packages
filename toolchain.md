@@ -50,6 +50,9 @@ Direct dependencies of the workspace members. Path crates are this repo.
 | serde_json | local | https://github.com/serde-rs/json | `scoped-check` JSON output |
 | shlex | local | https://github.com/comex/rust-shlex | Shell-quoting substituted values |
 | tempfile | local | https://github.com/Stebalien/tempfile | Throwaway repos and files in tests |
+| text-sanitize | local | https://github.com/pyrlyn/crates-packages | Escape and header sanitizing |
+| unicode-width | local | https://github.com/unicode-rs/unicode-width | Display width for `text-sanitize` truncation |
+| libfuzzer-sys | local | https://github.com/rust-fuzz/libfuzzer | Fuzz harness beside `text-sanitize`; not a workspace member |
 | thiserror | local | https://github.com/dtolnay/thiserror | Crate-local error enums |
 | toml | local | https://github.com/toml-rs/toml | TOML documents, including layered config |
 

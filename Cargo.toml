@@ -1,5 +1,5 @@
 [workspace]
-members = ["abi-drift", "cargo-changed-packages", "change-preview", "file-backup", "gettext-catalog", "git-changed-paths", "layered-config", "llm-anthropic", "llm-http", "llm-openai", "llm-testkit", "llm-wire", "path-gates", "scoped-check", "secret-store", "telemetry-setup"]
+members = ["abi-drift", "cargo-changed-packages", "change-preview", "file-backup", "gettext-catalog", "git-changed-paths", "layered-config", "llm-anthropic", "llm-http", "llm-openai", "llm-testkit", "llm-wire", "path-gates", "scoped-check", "secret-store", "telemetry-setup", "text-sanitize"]
 resolver = "2"
 
 [workspace.package]

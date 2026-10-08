@@ -1,0 +1,14 @@
+[package]
+name = "text-sanitize"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.86"
+description = "Strip escape sequences and header injection from untrusted text"
+license.workspace = true
+repository = "https://github.com/pyrlyn/crates-packages"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[dependencies]
+unicode-width = "0.2"
