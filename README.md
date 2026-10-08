@@ -6,6 +6,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 
 | Crate | What it does |
 | --- | --- |
+| [`abi-drift`](abi-drift) | cbindgen and csbindgen regenerate-and-diff, with `BLESS` |
 | [`cargo-changed-packages`](cargo-changed-packages) | Workspace packages a set of changed paths affects, including reverse dependencies |
 | [`layered-config`](layered-config) | Ordered TOML layers; a later layer wins, and each leaf records which layer set it |
 | [`llm-anthropic`](llm-anthropic) | Anthropic Messages API through that transport |

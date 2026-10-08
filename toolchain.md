@@ -17,7 +17,10 @@ Direct dependencies of the workspace members. Path crates are this repo.
 
 | Package | Where | Source | Why here |
 | --- | --- | --- | --- |
+| abi-drift | local | https://github.com/pyrlyn/crates-packages | cbindgen and csbindgen regenerate-and-diff |
 | cargo-changed-packages | local | https://github.com/pyrlyn/crates-packages | Affected workspace packages |
+| cbindgen | local | https://github.com/mozilla/cbindgen | Header generation for `abi-drift` |
+| csbindgen | local | https://github.com/Cysharp/csbindgen | C# binding generation for `abi-drift` |
 | file-backup | local | https://github.com/pyrlyn/crates-packages | Sibling `.bak-<unix-seconds>` copies |
 | gettext-catalog | local | https://github.com/pyrlyn/crates-packages | `.po` catalog loader and plural selection |
 | git-changed-paths | local | https://github.com/pyrlyn/crates-packages | Change set against a base ref |
