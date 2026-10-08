@@ -8,6 +8,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | --- | --- |
 | [`cargo-changed-packages`](cargo-changed-packages) | Workspace packages a set of changed paths affects, including reverse dependencies |
 | [`layered-config`](layered-config) | Ordered TOML layers; a later layer wins, and each leaf records which layer set it |
+| [`llm-anthropic`](llm-anthropic) | Anthropic Messages API through that transport |
 | [`llm-http`](llm-http) | JSON HTTP through an injected transport, with retry and no sockets |
 | [`llm-openai`](llm-openai) | OpenAI chat completions through that transport |
 | [`llm-wire`](llm-wire) | Provider-neutral chat messages and server-sent events |

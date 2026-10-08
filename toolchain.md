@@ -23,6 +23,7 @@ Direct dependencies of the workspace members. Path crates are this repo.
 | git-changed-paths | local | https://github.com/pyrlyn/crates-packages | Change set against a base ref |
 | polib | local | https://github.com/brettdong/polib | Reads `.po` files for `gettext-catalog` |
 | layered-config | local | https://github.com/pyrlyn/crates-packages | Ordered TOML layers with per-leaf provenance |
+| llm-anthropic | local | https://github.com/pyrlyn/crates-packages | Anthropic Messages API on `llm-http` |
 | llm-http | local | https://github.com/pyrlyn/crates-packages | Injected HTTP transport and retry; no sockets |
 | llm-openai | local | https://github.com/pyrlyn/crates-packages | OpenAI chat completions on `llm-http` |
 | llm-wire | local | https://github.com/pyrlyn/crates-packages | Provider-neutral chat messages and SSE frames |
