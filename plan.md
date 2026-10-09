@@ -20,7 +20,7 @@ Cargo workspace of five small published crates shared by ketch and rtok — git-
 | T13 | in progress | P1 | 2 | 90% | Claude / opus-5.5 |
 | T20.2 | todo | P1 | 3 | 0% | |
 | T20.3 | todo | P2 | 4 | 0% | |
-| T21 | in progress | P1 | 3 | 10% | Cursor / claude-opus-5.5 |
+| T21 | in progress | P1 | 3 | 90% | Cursor / claude-opus-5.5 |
 
 Audit note (2026-10-07): verified defenses — git argument injection refused, POSIX shell quoting correct, path traversal blocked, fail-safe direction is always "everything changed". The tasks below are what remains.
 
@@ -93,6 +93,8 @@ Plan:
 3. What named aulo becomes a setting: the application name (file prefix and OTLP service name), the filter environment variable, and extra credential patterns (aulo's `aulo_<hex>` tokens). An invalid pattern or an application name that is not a plain file name is an error at setup.
 4. Register: workspace members, `ci.yml` dry-run publish and an `otlp` feature test on Linux, `bump.yml` package option, root README crate table and token scope, `sonar-project.properties`, root `toolchain.md`.
 5. Check: `cargo test --workspace --locked`, the same with `-p telemetry-setup --features otlp`, clippy `-D warnings` with and without the feature, fmt, `cargo publish --dry-run -p telemetry-setup --locked`, `cargo +1.98 check -p telemetry-setup --all-features`.
+
+Left: review and merge. Consumers cannot migrate until the crate is on crates.io (`rust.md`: a registry version plus a local `paths` override, never a bare path), and publishing it is the creator's call.
 
 ### T13. app-home: one home, app-home and XDG resolver
 
