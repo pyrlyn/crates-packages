@@ -27,6 +27,7 @@ on:
           - file-backup
           - change-preview
           - wasm-plugin-host
+          - telemetry-setup
       dry-run:
         description: open the version pull request and wait for its checks, then close it
         default: false
