@@ -11,4 +11,5 @@
 - T11. atomic-replace: one atomic file write for every project
 - T20.2. wasm-plugin-host: package layout
 - T20.3. wasm-plugin-host: host-function kit
+- T21. telemetry-setup: tracing setup with secret redaction
 - T13. app-home: one home, app-home and XDG resolver
