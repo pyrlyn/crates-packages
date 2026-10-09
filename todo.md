@@ -9,6 +9,5 @@
 - T9. Robustness batch: dead gates, dropped paths, `./` stripping
 - T10. Fix crate metadata: license mix and repository URL drift
 - T11. atomic-replace: one atomic file write for every project
-- T20.2. wasm-plugin-host: package layout
 - T20.3. wasm-plugin-host: host-function kit
 - T13. app-home: one home, app-home and XDG resolver
