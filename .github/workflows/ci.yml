@@ -70,4 +70,5 @@ jobs:
           cargo publish --dry-run -p telemetry-setup --locked
           # The workspace run builds default features only; OTLP export is opt-in.
           cargo test -p telemetry-setup --features otlp --locked
+          cargo publish --dry-run -p gettext-catalog --locked
         fi
