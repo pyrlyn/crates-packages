@@ -9,6 +9,8 @@ license.workspace = true
 repository = "https://github.com/pyrlyn/crates-packages"
 keywords = ["tracing", "logging", "redaction", "opentelemetry"]
 categories = ["development-tools::debugging"]
+# The member's plan and agent files are repository bookkeeping, not part of the published crate.
+include = ["/src", "/tests", "/README.md"]
 
 [lints.rust]
 unsafe_code = "forbid"
