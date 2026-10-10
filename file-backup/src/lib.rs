@@ -21,6 +21,8 @@ use std::io::{self, Write};
 use std::path::{Component, Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use same_file::Handle;
+
 /// Folder name next to a config file that holds undo copies, for [`Folder`].
 pub const DEFAULT_FOLDER: &str = "_backup";
 
@@ -171,10 +173,11 @@ fn copy_unless_present(
     name: &str,
     in_folder: bool,
 ) -> io::Result<Option<PathBuf>> {
-    let src_meta = fs::symlink_metadata(path)?;
+    fs::symlink_metadata(path)?;
     let body = fs::read(path)?;
     let prefix = format!("{name}.bak-");
-    if identical_backup_exists(dir, &src_meta, &body, |f| {
+    let src = Handle::from_path(path);
+    if identical_backup_exists(dir, src.as_ref().ok(), &body, |f| {
         in_folder || f.starts_with(&prefix)
     }) {
         return Ok(None);
@@ -220,10 +223,15 @@ fn copy_unless_present(
 /// `body`. Size first. Symlinks and hard links to the source are not backups.
 fn identical_backup_exists(
     dir: &Path,
-    src_meta: &fs::Metadata,
+    src: Option<&Handle>,
     body: &[u8],
     named: impl Fn(&str) -> bool,
 ) -> bool {
+    // Without a handle on the source a hard link to it cannot be told from a copy, and
+    // counting it as one would skip the only real backup.
+    let Some(src) = src else {
+        return false;
+    };
     // A bare relative path has an empty parent, which `read_dir` rejects.
     let listing = if dir.as_os_str().is_empty() {
         Path::new(".")
@@ -240,7 +248,7 @@ fn identical_backup_exists(
         let Ok(meta) = fs::symlink_metadata(e.path()) else {
             return false;
         };
-        if !meta.is_file() || same_file(src_meta, &meta) {
+        if !meta.is_file() || Handle::from_path(e.path()).is_ok_and(|h| h == *src) {
             return false;
         }
         meta.len() == body.len() as u64 && fs::read(e.path()).is_ok_and(|b| b == body)
@@ -274,27 +282,6 @@ fn generation(suffix: &str) -> Option<(u64, u64)> {
             .flatten()
     };
     Some((num(ts)?, num(n)?))
-}
-
-fn same_file(a: &fs::Metadata, b: &fs::Metadata) -> bool {
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::MetadataExt;
-        a.dev() == b.dev() && a.ino() == b.ino()
-    }
-    #[cfg(windows)]
-    {
-        use std::os::windows::fs::MetadataExt;
-        a.volume_serial_number().is_some()
-            && a.volume_serial_number() == b.volume_serial_number()
-            && a.file_index().is_some()
-            && a.file_index() == b.file_index()
-    }
-    #[cfg(not(any(unix, windows)))]
-    {
-        let _ = (a, b);
-        false
-    }
 }
 
 #[cfg(test)]
