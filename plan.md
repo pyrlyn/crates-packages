@@ -18,7 +18,7 @@ Cargo workspace of five small published crates shared by ketch and rtok — git-
 | T10 | todo | P2 | 1 | 0% | |
 | T11 | in progress | P1 | 2 | 90% | Claude / opus-5.5 |
 | T13 | in progress | P1 | 2 | 90% | Claude / opus-5.5 |
-| T20.2 | todo | P1 | 3 | 0% | |
+| T20.2 | done | P1 | 3 | 100% | |
 | T20.3 | todo | P2 | 4 | 0% | |
 | T21 | in progress | P1 | 3 | 90% | Cursor / claude-opus-5.5 |
 | T22.1 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
