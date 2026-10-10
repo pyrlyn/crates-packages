@@ -14,6 +14,7 @@ Cargo workspace of five small Rust crates shared by ketch and rtok:
 | `git-changed-paths` | Paths a git working tree changed relative to a base ref |
 | `path-gates` | Map changed paths to named gates by glob rules from a TOML config |
 | `scoped-check` | Binary that runs only the check commands a change touches |
+| `telemetry-setup` | `tracing` setup with rotating JSON logs, optional OTLP traces and secret redaction, shared by aulo and Mailune |
 | `wasm-plugin-host` | WebAssembly plugin host (extism) shared by cox and scull: worker per plugin, memory cap, deadlines |
 
 Each member directory has its own `AGENTS.md`. This file is the workspace root.

@@ -20,6 +20,7 @@ Cargo workspace of five small published crates shared by ketch and rtok — git-
 | T13 | in progress | P1 | 2 | 90% | Claude / opus-5.5 |
 | T20.2 | todo | P1 | 3 | 0% | |
 | T20.3 | todo | P2 | 4 | 0% | |
+| T21 | in progress | P1 | 3 | 90% | Cursor / claude-opus-5.5 |
 | T22.1 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
 | T22.2 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
 
@@ -83,6 +84,21 @@ Plugin packages on disk, generic over the application's manifest type and home d
 ### T20.3. wasm-plugin-host: host-function kit
 
 What every application's host functions repeat: the `(u64) -> u64` JSON wire with an `{"Ok": …}` / `{"Err": …}` reply, the per-export refusal rule, the plugin key-value store with its quotas, and the outbound HTTP allow-list with its body cap. Ported from cox `crates/cox-plugin/src/hostfn.rs` and `net.rs`, leaving the cox-only functions (context, tools, model calls) in cox. Done when cox's kernel functions could be rebuilt on the kit with their tests passing here.
+
+### T21. telemetry-setup: tracing setup with secret redaction
+
+Approved by the creator as Mailune's X3 (2026-10-08: code Mailune shares with other projects is extracted here). aulo (`aulo-telemetry`) and cox (`cox-telemetry`) each set up `tracing` by hand: a rotating JSON log file, a filter from config or an environment variable, and optional OTLP export. Only aulo masks secrets before a line reaches a sink. Mailune needs the same (its F5). rtok `src/otel` exports rtok's own events and has nothing to share. New crate `telemetry-setup`, extracted from `aulo-telemetry` with no change in what is masked. Done means: the crate is in the workspace with aulo's redaction and logging tests, registered for CI dry-run publish, bump, README and sonar. Consumers migrate in their own tasks once the crate is published (aulo first, then Mailune F5).
+
+Plan:
+1. `telemetry-setup/` with the member files of `wasm-plugin-host`. Edition 2024, `rust-version` 1.98 (cox, the lowest candidate consumer). Dependency versions are the ones aulo locks, so neither lock moves.
+2. From `aulo-telemetry`: `redact` (masking of a finished line, structural masking of a JSON record), the buffering `Scrubbed` writer, `Settings`/`subscriber`/`init`, and the `otlp` feature that masks span attributes before export.
+3. What named aulo becomes a setting: the application name (file prefix and OTLP service name), the filter environment variable, and extra credential patterns (aulo's `aulo_<hex>` tokens). An invalid pattern or an application name that is not a plain file name is an error at setup.
+4. Register: workspace members, `ci.yml` dry-run publish and an `otlp` feature test on Linux, `bump.yml` package option, root README crate table and token scope, `sonar-project.properties`, root `toolchain.md`.
+5. Check: `cargo test --workspace --locked`, the same with `-p telemetry-setup --features otlp`, clippy `-D warnings` with and without the feature, fmt, `cargo publish --dry-run -p telemetry-setup --locked`, `cargo +1.98 check -p telemetry-setup --all-features`.
+
+Checked locally on 2026-10-10 (fmt, clippy with and without `otlp`, workspace tests, the `otlp` tests, `cargo +1.98 check --all-features`, `cargo publish --dry-run -p telemetry-setup --locked`): all pass. The package ships only `src`, `tests` and `README.md`.
+
+Left: review and merge; GitHub Actions is disabled on this repository, so neither CI nor `bump.yml` can run until it is enabled; the `CARGO_REGISTRY_TOKEN` scope must add `telemetry-setup` before its first `bump.yml` run. Consumers migrate once the crate is on crates.io (`rust.md`: a registry version plus a local `paths` override, never a bare path).
 
 ### T13. app-home: one home, app-home and XDG resolver
 
