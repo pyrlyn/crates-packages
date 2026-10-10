@@ -33,4 +33,4 @@ Fractions and text counts select CLDR `other`: the `other_form` index, or a
 
 Extracted from cox's `cox-i18n`.
 
-Licensed under GPL-3.0-or-later.
+Licensed under either of MIT or Apache-2.0 at your option.
