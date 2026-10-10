@@ -22,6 +22,7 @@ Direct dependencies of the workspace members. Path crates are this repo.
 | git-changed-paths | local | https://github.com/pyrlyn/crates-packages | Change set against a base ref |
 | path-gates | local | https://github.com/pyrlyn/crates-packages | Changed paths to gates |
 | scoped-check | local | https://github.com/pyrlyn/crates-packages | Check commands for a change |
+| sqlite-change-feed | local | https://github.com/pyrlyn/crates-packages | Cross-process SQLite change feed |
 | anyhow | local | https://github.com/dtolnay/anyhow | Top-level errors of `scoped-check` |
 | assert_cmd | local | https://github.com/assert-rs/assert_cmd | Tests that run the `scoped-check` binary |
 | clap | local | https://github.com/clap-rs/clap | `scoped-check` CLI |
@@ -35,6 +36,8 @@ Direct dependencies of the workspace members. Path crates are this repo.
 | tempfile | local | https://github.com/Stebalien/tempfile | Throwaway repos and files in tests |
 | thiserror | local | https://github.com/dtolnay/thiserror | Crate-local error enums |
 | toml | local | https://github.com/toml-rs/toml | Gate and scoped-check config |
+| diesel | local | https://github.com/diesel-rs/diesel | `sqlite-change-feed` connection and pragma query |
+| libsqlite3-sys | local | https://github.com/rusqlite/rusqlite | Bundled SQLite in `sqlite-change-feed` tests |
 
 ## ketch
 
