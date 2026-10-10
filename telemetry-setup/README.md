@@ -28,4 +28,4 @@ application that builds its own layers.
 
 Extracted from aulo's `aulo-telemetry`.
 
-Licensed under GPL-3.0-or-later.
+Licensed under either of MIT or Apache-2.0 at your option.
