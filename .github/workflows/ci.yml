@@ -67,4 +67,5 @@ jobs:
           cargo publish --dry-run -p file-backup --locked
           cargo publish --dry-run -p change-preview --locked
           cargo publish --dry-run -p wasm-plugin-host --locked
+          cargo publish --dry-run -p gettext-catalog --locked
         fi
