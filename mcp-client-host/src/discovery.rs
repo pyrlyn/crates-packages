@@ -49,8 +49,12 @@ pub fn discover_with(
         let mut entries = servers_in(file.get("mcpServers"));
         if let Some(project) = project {
             let key = project.display().to_string();
+            // A direct lookup: a JSON pointer would need `~` and `/` in the key escaped,
+            // and a Windows path such as `C:\Users\RUNNER~1\...` carries a `~`.
             entries.extend(servers_in(
-                file.pointer(&format!("/projects/{}/mcpServers", key.replace('/', "~1"))),
+                file.get("projects")
+                    .and_then(|projects| projects.get(&key))
+                    .and_then(|project| project.get("mcpServers")),
             ));
         }
         add(&mut found, entries, "~/.claude.json");
