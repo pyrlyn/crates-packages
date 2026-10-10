@@ -5,7 +5,7 @@ edition = "2021"
 # ketch's MSRV, the lowest of its consumers (ketch 1.86, scull 1.99); similar 3.2 needs 1.85.
 rust-version = "1.86"
 description = "Drift tests for generated bindings: regenerate a cbindgen header or csbindgen C# file, diff it against the committed copy, rewrite it under a bless variable"
-license.workspace = true
+license = "MIT OR Apache-2.0"
 repository = "https://github.com/pyrlyn/crates-packages"
 keywords = ["cbindgen", "csbindgen", "ffi", "bindings", "testing"]
 categories = ["development-tools::testing", "development-tools::ffi"]

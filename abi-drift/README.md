@@ -27,4 +27,4 @@ one you do not use.
 
 Extracted from scull's `scull-ffi` and ketch's `ketch-capi` drift tests.
 
-Licensed under GPL-3.0-or-later.
+Licensed under either of MIT or Apache-2.0 at your option.
