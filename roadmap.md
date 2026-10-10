@@ -19,6 +19,9 @@ Approved by the creator on 2026-10-07: extract the filesystem and daemon logic d
 Consumer migrations (move into each app's roadmap when the crates they need are published):
 
 - aulo: `daemon-core`, `local-endpoint`, `login-service`, `atomic-replace`, `app-home`, `lock-file`.
+- scull: `abi-drift` (T24) for `crates/scull-ffi/tests/bindings.rs` (header and C# file, `SCULL_BLESS`).
+- ketch: `abi-drift` (T24) for the `ketch-capi` header test (`KETCH_BLESS`); the payload-schema drift check can use `Drift::check` too.
+- Mailune: `abi-drift` (T24) for its B6 C ABI header test.
 - runa: `local-endpoint` (fixes P15.1 unlink-before-bind race), `daemon-core` (SIGTERM, single instance), `login-service` (real launchctl/systemctl, correct escaping), `app-home` (9 resolvers), `atomic-replace` (runa-memory registry).
 - rtok: rtok-sys into `daemon-core`/`lock-file`, resident and rtok-hook onto `local-endpoint`, `atomic-replace`, `file-backup`, `path-within`, `app-home`.
 - swarfr: `login-service` (low priority keys), `atomic-replace` (three copies), `lock-file`, `app-home`.

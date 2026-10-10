@@ -12,3 +12,4 @@
 - T20.2. wasm-plugin-host: package layout
 - T20.3. wasm-plugin-host: host-function kit
 - T13. app-home: one home, app-home and XDG resolver
+- T24. abi-drift: drift tests for generated bindings
