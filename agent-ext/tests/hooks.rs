@@ -88,6 +88,8 @@ async fn hooks_crashing_hook_is_skipped_not_fatal() {
     assert!(matches!(out, HookOutcome::Failed { .. }), "{out:?}");
 }
 
+// Needs `sh` and `cat`, which a Windows runner does not have on PATH.
+#[cfg(unix)]
 #[tokio::test]
 async fn hooks_updated_input_is_applied() {
     // The hook reads the payload it was given and rewrites the command.
