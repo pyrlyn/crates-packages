@@ -225,11 +225,14 @@ fn write_atomic(path: &Path, text: &str) -> Result<()> {
     name.push(format!(".tmp-{}", std::process::id()));
     let temp = target.with_file_name(name);
     let write = || -> std::io::Result<()> {
-        fs::write(&temp, text)?;
+        // Sync through the handle that wrote: Windows refuses `sync_all` on a read-only handle.
+        let mut file = fs::File::create(&temp)?;
+        std::io::Write::write_all(&mut file, text.as_bytes())?;
+        file.sync_all()?;
+        drop(file);
         if let Ok(meta) = fs::metadata(&target) {
             fs::set_permissions(&temp, meta.permissions())?;
         }
-        fs::File::open(&temp)?.sync_all()?;
         fs::rename(&temp, &target)
     };
     write().map_err(|e| {
