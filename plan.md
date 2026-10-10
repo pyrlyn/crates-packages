@@ -20,6 +20,9 @@ Cargo workspace of five small published crates shared by ketch and rtok — git-
 | T13 | in progress | P1 | 2 | 90% | Claude / opus-5.5 |
 | T20.2 | todo | P1 | 3 | 0% | |
 | T20.3 | todo | P2 | 4 | 0% | |
+| T21 | in progress | P1 | 3 | 90% | Cursor / claude-opus-5.5 |
+| T22.1 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
+| T22.2 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
 | T23 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
 
 Audit note (2026-10-07): verified defenses — git argument injection refused, POSIX shell quoting correct, path traversal blocked, fail-safe direction is always "everything changed". The tasks below are what remains.
@@ -83,6 +86,21 @@ Plugin packages on disk, generic over the application's manifest type and home d
 
 What every application's host functions repeat: the `(u64) -> u64` JSON wire with an `{"Ok": …}` / `{"Err": …}` reply, the per-export refusal rule, the plugin key-value store with its quotas, and the outbound HTTP allow-list with its body cap. Ported from cox `crates/cox-plugin/src/hostfn.rs` and `net.rs`, leaving the cox-only functions (context, tools, model calls) in cox. Done when cox's kernel functions could be rebuilt on the kit with their tests passing here.
 
+### T21. telemetry-setup: tracing setup with secret redaction
+
+Approved by the creator as Mailune's X3 (2026-10-08: code Mailune shares with other projects is extracted here). aulo (`aulo-telemetry`) and cox (`cox-telemetry`) each set up `tracing` by hand: a rotating JSON log file, a filter from config or an environment variable, and optional OTLP export. Only aulo masks secrets before a line reaches a sink. Mailune needs the same (its F5). rtok `src/otel` exports rtok's own events and has nothing to share. New crate `telemetry-setup`, extracted from `aulo-telemetry` with no change in what is masked. Done means: the crate is in the workspace with aulo's redaction and logging tests, registered for CI dry-run publish, bump, README and sonar. Consumers migrate in their own tasks once the crate is published (aulo first, then Mailune F5).
+
+Plan:
+1. `telemetry-setup/` with the member files of `wasm-plugin-host`. Edition 2024, `rust-version` 1.98 (cox, the lowest candidate consumer). Dependency versions are the ones aulo locks, so neither lock moves.
+2. From `aulo-telemetry`: `redact` (masking of a finished line, structural masking of a JSON record), the buffering `Scrubbed` writer, `Settings`/`subscriber`/`init`, and the `otlp` feature that masks span attributes before export.
+3. What named aulo becomes a setting: the application name (file prefix and OTLP service name), the filter environment variable, and extra credential patterns (aulo's `aulo_<hex>` tokens). An invalid pattern or an application name that is not a plain file name is an error at setup.
+4. Register: workspace members, `ci.yml` dry-run publish and an `otlp` feature test on Linux, `bump.yml` package option, root README crate table and token scope, `sonar-project.properties`, root `toolchain.md`.
+5. Check: `cargo test --workspace --locked`, the same with `-p telemetry-setup --features otlp`, clippy `-D warnings` with and without the feature, fmt, `cargo publish --dry-run -p telemetry-setup --locked`, `cargo +1.98 check -p telemetry-setup --all-features`.
+
+Checked locally on 2026-10-10 (fmt, clippy with and without `otlp`, workspace tests, the `otlp` tests, `cargo +1.98 check --all-features`, `cargo publish --dry-run -p telemetry-setup --locked`): all pass. The package ships only `src`, `tests` and `README.md`.
+
+Left: review and merge; GitHub Actions is disabled on this repository, so neither CI nor `bump.yml` can run until it is enabled; the `CARGO_REGISTRY_TOKEN` scope must add `telemetry-setup` before its first `bump.yml` run. Consumers migrate once the crate is on crates.io (`rust.md`: a registry version plus a local `paths` override, never a bare path).
+
 ### T13. app-home: one home, app-home and XDG resolver
 
 About 30 hand-written resolvers across rtok, cox, aulo, ketch, runa and swarfr disagree on empty variables, the Windows `USERPROFILE` fallback, relative XDG values and the no-home fallback (runa alone has 9; cox and ketch each carry two that disagree). New crate `app-home` (std only, edition 2021, Rust 1.86). Done means: the crate is in the workspace with tests and registered like `atomic-replace`; consumers migrate in their own tasks.
@@ -94,6 +112,27 @@ Plan:
 4. `config_home`/`data_home`/`cache_home`/`state_home`: the XDG variable when absolute (the spec says relative values are invalid), else `~/.config`, `~/.local/share`, `~/.cache`, `~/.local/state` on every OS. From ketch `platform`/`shell.rs` and runa.
 5. `expand_tilde(path, home)`: `~`, `~/` and `~\` joined by components. From ketch `config.rs` and rtok-hook `join_tilde_rest`.
 6. Check: tests with injected env, clippy for macOS/Linux/Windows, Rust 1.86, publish dry-run.
+
+### T22.1. gettext-catalog: catalog parsing, plural rules and placeholders
+
+Approved by the creator as Mailune's X4 (2026-10-10: extract the shared code and publish it through release-plz). cox's `cox-i18n` parses `.po` catalogs with `polib`, evaluates `Plural-Forms` with its own parser, and fills `{name}` placeholders; Mailune's F10 needs the same for core-originated strings. New crate `gettext-catalog`, split into two tasks to stay under 500 lines each. This one: `catalog` (entries by key, fuzzy and incomplete plurals untranslated, the `# cldr-other:` override), `plural` (the GNU gettext C subset, tested against CLDR for ru and uk) and `format` (`pieces`, `placeholders`, `render`, `validate`), with one `Error` enum for the crate. Done means: the crate is in the workspace with those modules and their tests, registered for CI dry-run publish, bump, README, sonar and the root `toolchain.md`.
+
+Plan:
+1. `gettext-catalog/` with the member files of `wasm-plugin-host`. Edition 2024, `rust-version` 1.98 (cox). Dependency versions are the ones cox locks (`polib 0.3.0`, `unic-langid 0.9.6`, `sys-locale 0.3.2`).
+2. Port `catalog.rs`, `plural.rs` and `format.rs` from `cox-i18n` with their tests; the plural and placeholder errors become variants of the crate's `Error`, and the evaluator loses its `unreachable!`.
+3. Register as T21 did; the package ships only `src`, `tests` and `README.md`.
+4. Check: fmt, clippy `-D warnings`, `cargo test --workspace --locked`, `cargo publish --dry-run -p gettext-catalog --locked`.
+
+### T22.2. gettext-catalog: localizer with negotiation and fallback
+
+The second half of Mailune's X4. `Localizer` over the locales an application passes in (code, `.po` text, CLDR `other` form) and a default locale: negotiation by language subtag from POSIX and OS tags (`uk_UA.UTF-8`, `ru-RU`), the user's languages from `LC_ALL`, `LC_MESSAGES`, `LANG` and `sys-locale`, per-message fallback (translation, default `msgstr`, source text, then the id itself), `count` selecting the plural form, and constants such as a product name (cox's `{brand}`). cox keeps its embedded catalogs, `global()`, `tr!` and the native-catalog export. Done means: the localizer is in the crate with `.po` fixtures for en, ru and uk and tests for plural tables, fractional and text counts, fallback, negotiation and placeholders.
+
+Plan:
+1. `src/lib.rs`: `Locale`, `Value`, `Args`, `Localizer` (`new`, `for_tags`, `from_env`, `with_constant`, `chain`, `try_format`, `format`), `negotiate`, `parse_tag`, `requested_languages`, ported from `cox-i18n` with the cox constants (`LOCALES`, `BRAND_NAME`, `DEFAULT_LOCALE`) turned into parameters.
+2. `tests/fixtures/{en,ru,uk}.po` and `tests/localizer.rs`.
+3. Check as T22.1, plus the doc example.
+
+Left (both): review and merge; GitHub Actions must be enabled on this repository and `CARGO_REGISTRY_TOKEN` must cover `gettext-catalog` before its first `bump.yml` run. cox and Mailune migrate once the crate is on crates.io.
 
 ### T23. sqlite-change-feed: cross-process SQLite change feed
 

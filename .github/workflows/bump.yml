@@ -27,6 +27,8 @@ on:
           - file-backup
           - change-preview
           - wasm-plugin-host
+          - telemetry-setup
+          - gettext-catalog
           - sqlite-change-feed
       dry-run:
         description: open the version pull request and wait for its checks, then close it

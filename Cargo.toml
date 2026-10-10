@@ -1,5 +1,5 @@
 [workspace]
-members = ["cargo-changed-packages", "change-preview", "file-backup", "git-changed-paths", "path-gates", "scoped-check", "sqlite-change-feed", "wasm-plugin-host"]
+members = ["cargo-changed-packages", "change-preview", "file-backup", "gettext-catalog", "git-changed-paths", "path-gates", "scoped-check", "sqlite-change-feed", "telemetry-setup", "wasm-plugin-host"]
 resolver = "2"
 
 [workspace.package]
