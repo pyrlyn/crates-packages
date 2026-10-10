@@ -24,4 +24,4 @@ SQLCipher.
 
 Extracted from cox's `cox-store` (`watch.rs`).
 
-Licensed under GPL-3.0-or-later.
+Licensed under either of MIT or Apache-2.0 at your option.
