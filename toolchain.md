@@ -24,6 +24,7 @@ Direct dependencies of the workspace members. Path crates are this repo.
 | scoped-check | local | https://github.com/pyrlyn/crates-packages | Check commands for a change |
 | telemetry-setup | local | https://github.com/pyrlyn/crates-packages | tracing setup with secret redaction |
 | gettext-catalog | local | https://github.com/pyrlyn/crates-packages | gettext catalogs, plural rules and fallback |
+| sqlite-change-feed | local | https://github.com/pyrlyn/crates-packages | Cross-process SQLite change feed |
 | anyhow | local | https://github.com/dtolnay/anyhow | Top-level errors of `scoped-check` |
 | assert_cmd | local | https://github.com/assert-rs/assert_cmd | Tests that run the `scoped-check` binary |
 | clap | local | https://github.com/clap-rs/clap | `scoped-check` CLI |
@@ -48,6 +49,8 @@ Direct dependencies of the workspace members. Path crates are this repo.
 | polib | local | https://github.com/BrettDong/polib | `gettext-catalog` parses `.po` files |
 | sys-locale | local | https://github.com/1Password/sys-locale | `gettext-catalog` reads the OS UI languages |
 | unic-langid | local | https://github.com/zbraniecki/unic-locale | `gettext-catalog` language identifiers |
+| diesel | local | https://github.com/diesel-rs/diesel | `sqlite-change-feed` connection and pragma query |
+| libsqlite3-sys | local | https://github.com/rusqlite/rusqlite | Bundled SQLite in `sqlite-change-feed` tests |
 
 ## ketch
 

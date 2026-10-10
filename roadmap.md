@@ -19,8 +19,8 @@ Approved by the creator on 2026-10-07: extract the filesystem and daemon logic d
 Consumer migrations (move into each app's roadmap when the crates they need are published):
 
 - aulo: `daemon-core`, `local-endpoint`, `login-service`, `atomic-replace`, `app-home`, `lock-file`, `telemetry-setup` (T21; approved as Mailune X3, whose Done-when names this migration; `aulo-telemetry` keeps `AULO_LOG` and its `aulo_<hex>` token pattern as settings).
-- cox: `gettext-catalog` (T22) under `cox-i18n`, which keeps its catalogs, `tr!` and the native-catalog export.
-- Mailune: `telemetry-setup` (T21) for its F5 telemetry task, `gettext-catalog` (T22) for its F10 core strings.
+- cox: `gettext-catalog` (T22) under `cox-i18n`, which keeps its catalogs, `tr!` and the native-catalog export; `sqlite-change-feed` (T23) under `cox-store`'s `changes`, which keeps its mutex and `StoreError`.
+- Mailune: `telemetry-setup` (T21) for its F5 telemetry task, `gettext-catalog` (T22) for its F10 core strings, `sqlite-change-feed` (T23) for its S7 change feed.
 - runa: `local-endpoint` (fixes P15.1 unlink-before-bind race), `daemon-core` (SIGTERM, single instance), `login-service` (real launchctl/systemctl, correct escaping), `app-home` (9 resolvers), `atomic-replace` (runa-memory registry).
 - rtok: rtok-sys into `daemon-core`/`lock-file`, resident and rtok-hook onto `local-endpoint`, `atomic-replace`, `file-backup`, `path-within`, `app-home`.
 - swarfr: `login-service` (low priority keys), `atomic-replace` (three copies), `lock-file`, `app-home`.

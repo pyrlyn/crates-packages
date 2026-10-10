@@ -15,3 +15,4 @@
 - T13. app-home: one home, app-home and XDG resolver
 - T22.1. gettext-catalog: catalog parsing, plural rules and placeholders
 - T22.2. gettext-catalog: localizer with negotiation and fallback
+- T23. sqlite-change-feed: cross-process SQLite change feed
