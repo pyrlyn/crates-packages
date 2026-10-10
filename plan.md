@@ -20,6 +20,7 @@ Cargo workspace of five small published crates shared by ketch and rtok — git-
 | T13 | in progress | P1 | 2 | 90% | Claude / opus-5.5 |
 | T20.2 | todo | P1 | 3 | 0% | |
 | T20.3 | todo | P2 | 4 | 0% | |
+| T23 | in progress | P1 | 2 | 0% | Cursor / claude-opus-5.5 |
 
 Audit note (2026-10-07): verified defenses — git argument injection refused, POSIX shell quoting correct, path traversal blocked, fail-safe direction is always "everything changed". The tasks below are what remains.
 
@@ -94,3 +95,15 @@ Plan:
 5. `expand_tilde(path, home)`: `~`, `~/` and `~\` joined by components. From ketch `config.rs` and rtok-hook `join_tilde_rest`.
 6. Check: tests with injected env, clippy for macOS/Linux/Windows, Rust 1.86, publish dry-run.
 
+### T23. sqlite-change-feed: cross-process SQLite change feed
+
+Approved by the creator as Mailune's X11 (2026-10-10: extract the shared code and publish it through release-plz). cox's `cox-store` (`src/watch.rs`) tells the app and a TUI sharing one `cox.db` when the other committed, by polling `PRAGMA data_version`; Mailune's S7 change feed reads the same pragma. New crate `sqlite-change-feed`: `ChangeToken::new(conn)`, `ChangeToken::poll(conn)` and `data_version(conn)` over a Diesel `SqliteConnection`, with no connection, thread or `libsqlite3-sys` choice of its own. Done means: the crate is in the workspace with a test in which a writer in another process commits and the feed sees it once, plus a second-connection test in the same process, registered for CI dry-run publish, bump, README, sonar and the root `toolchain.md`.
+
+Plan:
+1. `sqlite-change-feed/` with the member files of `wasm-plugin-host`. Edition 2024, `rust-version` 1.98 (cox). `diesel 2.3.13` with only the `sqlite` feature (cox and Mailune lock 2.3.13 and 2.3.14); bundled `libsqlite3-sys 0.38.2` as a dev-dependency only.
+2. Port the token and the pragma from `watch.rs`; the store's mutex and `StoreError` stay in cox.
+3. `tests/feed.rs`: the cross-process test re-executes the test binary as cox's does (an ignored `writer_process` test), plus own-commit, second-connection and two-consumer tests.
+4. Register as T21 did; the package ships only `src`, `tests` and `README.md`.
+5. Check: fmt, clippy `-D warnings`, `cargo test --workspace --locked`, `cargo nextest run -p sqlite-change-feed`, `cargo publish --dry-run -p sqlite-change-feed --locked`.
+
+Left: review and merge; GitHub Actions must be enabled on this repository and `CARGO_REGISTRY_TOKEN` must cover `sqlite-change-feed` before its first `bump.yml` run. cox and Mailune migrate once the crate is on crates.io.
