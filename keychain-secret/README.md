@@ -30,4 +30,4 @@ match resolve("OPENAI_API_KEY", "openai", store.as_ref())? {
 Extracted from runa's `runa-cloud` (`secrets.rs`), cox's `cox-provider-http`
 key lookup and `no_real_keychain_in_tests` guard, and aulo's token store.
 
-Licensed under GPL-3.0-or-later.
+Licensed under either of MIT or Apache-2.0 at your option.

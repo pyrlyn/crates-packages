@@ -5,7 +5,7 @@ edition = "2024"
 # cox's and runa's MSRV, the lowest of its consumers (cox and runa 1.98, aulo and Mailune 1.99).
 rust-version = "1.98"
 description = "Application secrets from an environment variable or the OS keychain, never a config file: a redacted Secret type, an in-memory store for tests and a guard against tests reaching the real keychain"
-license.workspace = true
+license = "MIT OR Apache-2.0"
 repository = "https://github.com/pyrlyn/crates-packages"
 keywords = ["keychain", "keyring", "secrets", "credentials", "api-key"]
 categories = ["authentication", "config"]
