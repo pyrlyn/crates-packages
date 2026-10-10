@@ -19,6 +19,8 @@ Approved by the creator on 2026-10-07: extract the filesystem and daemon logic d
 Consumer migrations (move into each app's roadmap when the crates they need are published):
 
 - aulo: `daemon-core`, `local-endpoint`, `login-service`, `atomic-replace`, `app-home`, `lock-file`.
+- cox: `gettext-catalog` (T22) under `cox-i18n`, which keeps its catalogs, `tr!` and the native-catalog export.
+- Mailune: `gettext-catalog` (T22) for its F10 core strings.
 - runa: `local-endpoint` (fixes P15.1 unlink-before-bind race), `daemon-core` (SIGTERM, single instance), `login-service` (real launchctl/systemctl, correct escaping), `app-home` (9 resolvers), `atomic-replace` (runa-memory registry).
 - rtok: rtok-sys into `daemon-core`/`lock-file`, resident and rtok-hook onto `local-endpoint`, `atomic-replace`, `file-backup`, `path-within`, `app-home`.
 - swarfr: `login-service` (low priority keys), `atomic-replace` (three copies), `lock-file`, `app-home`.

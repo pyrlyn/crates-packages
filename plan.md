@@ -20,6 +20,8 @@ Cargo workspace of five small published crates shared by ketch and rtok — git-
 | T13 | in progress | P1 | 2 | 90% | Claude / opus-5.5 |
 | T20.2 | todo | P1 | 3 | 0% | |
 | T20.3 | todo | P2 | 4 | 0% | |
+| T22.1 | in progress | P1 | 2 | 0% | Cursor / claude-opus-5.5 |
+| T22.2 | in progress | P1 | 2 | 0% | Cursor / claude-opus-5.5 |
 
 Audit note (2026-10-07): verified defenses — git argument injection refused, POSIX shell quoting correct, path traversal blocked, fail-safe direction is always "everything changed". The tasks below are what remains.
 
@@ -94,3 +96,23 @@ Plan:
 5. `expand_tilde(path, home)`: `~`, `~/` and `~\` joined by components. From ketch `config.rs` and rtok-hook `join_tilde_rest`.
 6. Check: tests with injected env, clippy for macOS/Linux/Windows, Rust 1.86, publish dry-run.
 
+### T22.1. gettext-catalog: catalog parsing, plural rules and placeholders
+
+Approved by the creator as Mailune's X4 (2026-10-10: extract the shared code and publish it through release-plz). cox's `cox-i18n` parses `.po` catalogs with `polib`, evaluates `Plural-Forms` with its own parser, and fills `{name}` placeholders; Mailune's F10 needs the same for core-originated strings. New crate `gettext-catalog`, split into two tasks to stay under 500 lines each. This one: `catalog` (entries by key, fuzzy and incomplete plurals untranslated, the `# cldr-other:` override), `plural` (the GNU gettext C subset, tested against CLDR for ru and uk) and `format` (`pieces`, `placeholders`, `render`, `validate`), with one `Error` enum for the crate. Done means: the crate is in the workspace with those modules and their tests, registered for CI dry-run publish, bump, README, sonar and the root `toolchain.md`.
+
+Plan:
+1. `gettext-catalog/` with the member files of `wasm-plugin-host`. Edition 2024, `rust-version` 1.98 (cox). Dependency versions are the ones cox locks (`polib 0.3.0`, `unic-langid 0.9.6`, `sys-locale 0.3.2`).
+2. Port `catalog.rs`, `plural.rs` and `format.rs` from `cox-i18n` with their tests; the plural and placeholder errors become variants of the crate's `Error`, and the evaluator loses its `unreachable!`.
+3. Register as T21 did; the package ships only `src`, `tests` and `README.md`.
+4. Check: fmt, clippy `-D warnings`, `cargo test --workspace --locked`, `cargo publish --dry-run -p gettext-catalog --locked`.
+
+### T22.2. gettext-catalog: localizer with negotiation and fallback
+
+The second half of Mailune's X4. `Localizer` over the locales an application passes in (code, `.po` text, CLDR `other` form) and a default locale: negotiation by language subtag from POSIX and OS tags (`uk_UA.UTF-8`, `ru-RU`), the user's languages from `LC_ALL`, `LC_MESSAGES`, `LANG` and `sys-locale`, per-message fallback (translation, default `msgstr`, source text, then the id itself), `count` selecting the plural form, and constants such as a product name (cox's `{brand}`). cox keeps its embedded catalogs, `global()`, `tr!` and the native-catalog export. Done means: the localizer is in the crate with `.po` fixtures for en, ru and uk and tests for plural tables, fractional and text counts, fallback, negotiation and placeholders.
+
+Plan:
+1. `src/lib.rs`: `Locale`, `Value`, `Args`, `Localizer` (`new`, `for_tags`, `from_env`, `with_constant`, `chain`, `try_format`, `format`), `negotiate`, `parse_tag`, `requested_languages`, ported from `cox-i18n` with the cox constants (`LOCALES`, `BRAND_NAME`, `DEFAULT_LOCALE`) turned into parameters.
+2. `tests/fixtures/{en,ru,uk}.po` and `tests/localizer.rs`.
+3. Check as T22.1, plus the doc example.
+
+Left (both): review and merge; GitHub Actions must be enabled on this repository and `CARGO_REGISTRY_TOKEN` must cover `gettext-catalog` before its first `bump.yml` run. cox and Mailune migrate once the crate is on crates.io.
