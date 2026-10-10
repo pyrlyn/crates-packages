@@ -67,6 +67,12 @@ jobs:
         ]
       feature-args: ""
       clippy-args: --locked
+      # speech-capture links ALSA through cpal's alsa-sys on Linux.
+      setup-command: |
+        if [ "$RUNNER_OS" = Linux ]; then
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libasound2-dev pkg-config
+        fi
       # Publishing happens only from release.yml on a version-bump merge. Every other push
       # proves the crate is publish-ready, so a broken publish breaks here, not at release.
       test-command: |
