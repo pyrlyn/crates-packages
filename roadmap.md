@@ -18,10 +18,12 @@ Approved by the creator on 2026-10-07: extract the filesystem and daemon logic d
 
 Consumer migrations (move into each app's roadmap when the crates they need are published):
 
-- aulo: `daemon-core`, `local-endpoint`, `login-service`, `atomic-replace`, `app-home`, `lock-file`.
-- Mailune: `keychain-secret` (T25) for its C1 secrets, with `guard::violations` as its no-real-keychain test.
-- runa: `keychain-secret` (T25) for `runa-cloud/src/secrets.rs` (`RUNA_NO_KEYRING` as the switch).
-- runa: `local-endpoint` (fixes P15.1 unlink-before-bind race), `daemon-core` (SIGTERM, single instance), `login-service` (real launchctl/systemctl, correct escaping), `app-home` (9 resolvers), `atomic-replace` (runa-memory registry).
+- aulo: `daemon-core`, `local-endpoint`, `login-service`, `atomic-replace`, `app-home`, `lock-file`, `telemetry-setup` (T21; approved as Mailune X3, whose Done-when names this migration; `aulo-telemetry` keeps `AULO_LOG` and its `aulo_<hex>` token pattern as settings).
+- cox: `gettext-catalog` (T22) under `cox-i18n`, which keeps its catalogs, `tr!` and the native-catalog export; `sqlite-change-feed` (T23) under `cox-store`'s `changes`, which keeps its mutex and `StoreError`.
+- scull: `abi-drift` (T24) for `crates/scull-ffi/tests/bindings.rs` (header and C# file, `SCULL_BLESS`).
+- ketch: `abi-drift` (T24) for the `ketch-capi` header test (`KETCH_BLESS`); the payload-schema drift check can use `Drift::check` too.
+- Mailune: `telemetry-setup` (T21) for its F5 telemetry task, `gettext-catalog` (T22) for its F10 core strings, `sqlite-change-feed` (T23) for its S7 change feed, `abi-drift` (T24) for its B6 C ABI header test, `keychain-secret` (T25) for its C1 secrets, with `guard::violations` as its no-real-keychain test.
+- runa: `local-endpoint` (fixes P15.1 unlink-before-bind race), `daemon-core` (SIGTERM, single instance), `login-service` (real launchctl/systemctl, correct escaping), `app-home` (9 resolvers), `atomic-replace` (runa-memory registry), `keychain-secret` (T25) for `runa-cloud/src/secrets.rs` (`RUNA_NO_KEYRING` as the switch).
 - rtok: rtok-sys into `daemon-core`/`lock-file`, resident and rtok-hook onto `local-endpoint`, `atomic-replace`, `file-backup`, `path-within`, `app-home`.
 - swarfr: `login-service` (low priority keys), `atomic-replace` (three copies), `lock-file`, `app-home`.
 - cox: `atomic-replace` (fixes non-atomic `cox-config` write and lost permissions in `cox-tools`), `lock-file`, `app-home` (two resolvers disagree), `path-within`, `dir-ops`.
