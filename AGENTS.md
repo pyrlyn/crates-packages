@@ -10,6 +10,7 @@ Cargo workspace of five small Rust crates shared by ketch and rtok:
 | --- | --- |
 | `cargo-changed-packages` | Workspace packages a set of changed paths affects, including reverse dependencies |
 | `file-backup` | Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it |
+| `gettext-catalog` | gettext `.po` catalogs for an application's own strings: plural rules, named placeholders, language negotiation and per-message fallback |
 | `git-changed-paths` | Paths a git working tree changed relative to a base ref |
 | `path-gates` | Map changed paths to named gates by glob rules from a TOML config |
 | `scoped-check` | Binary that runs only the check commands a change touches |
