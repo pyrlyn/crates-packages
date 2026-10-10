@@ -178,7 +178,8 @@ fn bind(argv: &mut Vec<String>, flag: &str, path: &Path) {
     argv.push(path);
 }
 
-#[cfg(test)]
+// The profiles and argv built here are Unix paths; a Windows runner has no sandbox to test.
+#[cfg(all(test, unix))]
 mod tests {
     use super::*;
     use crate::policy::SandboxMode;

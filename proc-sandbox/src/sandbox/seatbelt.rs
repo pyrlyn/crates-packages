@@ -66,7 +66,8 @@ fn escape(s: &str) -> String {
     s.replace('\\', "\\\\").replace('"', "\\\"")
 }
 
-#[cfg(test)]
+// The profiles and argv built here are Unix paths; a Windows runner has no sandbox to test.
+#[cfg(all(test, unix))]
 mod tests {
     use super::*;
 
