@@ -46,8 +46,9 @@ jobs:
           done
           exit $bad
 
-  # pyrlyn/ci ci-rust.yml: fmt once, then clippy, check and tests per target of its shared
-  # matrix (Linux x86_64 + aarch64, macOS aarch64, Windows x86_64; build-only macOS x86_64).
+  # pyrlyn/ci ci-rust.yml: fmt once, then clippy, check and tests per target: Linux x86_64 +
+  # aarch64, macOS aarch64, Windows x86_64. The shared matrix at this pin still builds macOS
+  # x86_64, so the targets are listed here: Intel macOS is not supported.
   # file-backup is std-only and shared by ketch and rtok on all three platforms. The toolchain
   # is rust-toolchain.toml's channel, pinned exactly (every job fails on another rustc).
   rust:
@@ -57,6 +58,13 @@ jobs:
       actions: write # cancel-run on failure
     with:
       rust-version: "1.99.0" # rust-toolchain.toml channel = "1.99.0"
+      matrix: >-
+        [
+        {"os": "ubuntu-latest", "target": "x86_64-unknown-linux-gnu"},
+        {"os": "ubuntu-24.04-arm", "target": "aarch64-unknown-linux-gnu"},
+        {"os": "macos-latest", "target": "aarch64-apple-darwin"},
+        {"os": "windows-latest", "target": "x86_64-pc-windows-msvc"}
+        ]
       feature-args: ""
       clippy-args: --locked
       # speech-capture links ALSA through cpal's alsa-sys on Linux.
@@ -73,4 +81,11 @@ jobs:
           cargo publish --dry-run -p file-backup --locked
           cargo publish --dry-run -p change-preview --locked
           cargo publish --dry-run -p wasm-plugin-host --locked
+          cargo publish --dry-run -p telemetry-setup --locked
+          # The workspace run builds default features only; OTLP export is opt-in.
+          cargo test -p telemetry-setup --features otlp --locked
+          cargo publish --dry-run -p gettext-catalog --locked
+          cargo publish --dry-run -p sqlite-change-feed --locked
+          cargo publish --dry-run -p abi-drift --locked
+          cargo publish --dry-run -p keychain-secret --locked
         fi
