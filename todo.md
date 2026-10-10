@@ -16,3 +16,4 @@
 - T22.1. gettext-catalog: catalog parsing, plural rules and placeholders
 - T22.2. gettext-catalog: localizer with negotiation and fallback
 - T23. sqlite-change-feed: cross-process SQLite change feed
+- T24. abi-drift: drift tests for generated bindings

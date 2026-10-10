@@ -6,6 +6,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 
 | Crate | What it does |
 | --- | --- |
+| [`abi-drift`](abi-drift) | Drift tests for generated bindings: regenerate a cbindgen header or csbindgen C# file, diff it against the committed copy, bless to rewrite |
 | [`cargo-changed-packages`](cargo-changed-packages) | Workspace packages a set of changed paths affects, including reverse dependencies |
 | [`change-preview`](change-preview) | Preview what a command would change: diff or `--stat` of edits, size and file count of removals, totals |
 | [`file-backup`](file-backup) | Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it |
@@ -54,7 +55,7 @@ Two secrets must exist in the repo settings
 
 | Secret | Where to get it | Used by |
 | --- | --- | --- |
-| `CARGO_REGISTRY_TOKEN` | crates.io → Account Settings → API Tokens → New Token (needs `publish-new` and `publish-update` scopes; restrict it to the `file-backup`, `change-preview`, `wasm-plugin-host`, `telemetry-setup`, `gettext-catalog` and `sqlite-change-feed` crates; add each new crate before its first release). Add with `gh secret set CARGO_REGISTRY_TOKEN --repo pyrlyn/crates-packages` | `release.yml`, job `crates-io`: `cargo publish -p <crate>` |
+| `CARGO_REGISTRY_TOKEN` | crates.io → Account Settings → API Tokens → New Token (needs `publish-new` and `publish-update` scopes; restrict it to the `file-backup`, `change-preview`, `wasm-plugin-host`, `telemetry-setup`, `gettext-catalog`, `sqlite-change-feed` and `abi-drift` crates; add each new crate before its first release). Add with `gh secret set CARGO_REGISTRY_TOKEN --repo pyrlyn/crates-packages` | `release.yml`, job `crates-io`: `cargo publish -p <crate>` |
 | `RELEASE_PLZ_TOKEN` | A fine-grained PAT (or GitHub App token) with **Contents** and **Pull requests** read/write on this repo — see https://release-plz.dev/docs/github/token. The default `GITHUB_TOKEN` cannot trigger `release.yml` from the release PR it opens, so without this the release PR would land without CI. Add with `gh secret set RELEASE_PLZ_TOKEN --repo pyrlyn/crates-packages` | `bump.yml`: pushes the version branch and opens the version PR |
 
 Without `CARGO_REGISTRY_TOKEN` the release stops at the `crates-io` job with

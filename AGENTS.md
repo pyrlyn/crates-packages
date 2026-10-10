@@ -8,6 +8,7 @@ Cargo workspace of five small Rust crates shared by ketch and rtok:
 
 | Crate | Role |
 | --- | --- |
+| `abi-drift` | Drift tests for generated bindings: regenerate a cbindgen header or csbindgen C# file, diff it against the committed copy, bless to rewrite |
 | `cargo-changed-packages` | Workspace packages a set of changed paths affects, including reverse dependencies |
 | `file-backup` | Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it |
 | `gettext-catalog` | gettext `.po` catalogs for an application's own strings: plural rules, named placeholders, language negotiation and per-message fallback |

@@ -25,6 +25,7 @@ Direct dependencies of the workspace members. Path crates are this repo.
 | telemetry-setup | local | https://github.com/pyrlyn/crates-packages | tracing setup with secret redaction |
 | gettext-catalog | local | https://github.com/pyrlyn/crates-packages | gettext catalogs, plural rules and fallback |
 | sqlite-change-feed | local | https://github.com/pyrlyn/crates-packages | Cross-process SQLite change feed |
+| abi-drift | local | https://github.com/pyrlyn/crates-packages | Drift tests for generated bindings |
 | anyhow | local | https://github.com/dtolnay/anyhow | Top-level errors of `scoped-check` |
 | assert_cmd | local | https://github.com/assert-rs/assert_cmd | Tests that run the `scoped-check` binary |
 | clap | local | https://github.com/clap-rs/clap | `scoped-check` CLI |
@@ -51,6 +52,9 @@ Direct dependencies of the workspace members. Path crates are this repo.
 | unic-langid | local | https://github.com/zbraniecki/unic-locale | `gettext-catalog` language identifiers |
 | diesel | local | https://github.com/diesel-rs/diesel | `sqlite-change-feed` connection and pragma query |
 | libsqlite3-sys | local | https://github.com/rusqlite/rusqlite | Bundled SQLite in `sqlite-change-feed` tests |
+| cbindgen | local | https://github.com/mozilla/cbindgen | `abi-drift` renders C headers |
+| csbindgen | local | https://github.com/Cysharp/csbindgen | `abi-drift` renders C# bindings |
+| similar | local | https://github.com/mitsuhiko/similar | Unified diffs in `abi-drift` and `change-preview` |
 
 ## ketch
 

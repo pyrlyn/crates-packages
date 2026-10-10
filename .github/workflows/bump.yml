@@ -30,6 +30,7 @@ on:
           - telemetry-setup
           - gettext-catalog
           - sqlite-change-feed
+          - abi-drift
       dry-run:
         description: open the version pull request and wait for its checks, then close it
         default: false

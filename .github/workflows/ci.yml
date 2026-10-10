@@ -72,4 +72,5 @@ jobs:
           cargo test -p telemetry-setup --features otlp --locked
           cargo publish --dry-run -p gettext-catalog --locked
           cargo publish --dry-run -p sqlite-change-feed --locked
+          cargo publish --dry-run -p abi-drift --locked
         fi

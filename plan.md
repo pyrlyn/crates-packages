@@ -24,6 +24,7 @@ Cargo workspace of five small published crates shared by ketch and rtok — git-
 | T22.1 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
 | T22.2 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
 | T23 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
+| T24 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
 
 Audit note (2026-10-07): verified defenses — git argument injection refused, POSIX shell quoting correct, path traversal blocked, fail-safe direction is always "everything changed". The tasks below are what remains.
 
@@ -146,3 +147,16 @@ Plan:
 5. Check: fmt, clippy `-D warnings`, `cargo test --workspace --locked`, `cargo nextest run -p sqlite-change-feed`, `cargo publish --dry-run -p sqlite-change-feed --locked`.
 
 Left: review and merge; GitHub Actions must be enabled on this repository and `CARGO_REGISTRY_TOKEN` must cover `sqlite-change-feed` before its first `bump.yml` run. cox and Mailune migrate once the crate is on crates.io.
+
+### T24. abi-drift: drift tests for generated bindings
+
+Approved by the creator as Mailune's X9 (2026-10-10: extract the shared code and publish it through release-plz). scull (`crates/scull-ffi/tests/bindings.rs`) and ketch (`ketch-capi`'s header test) each regenerate their cbindgen header (and scull its csbindgen C# file) in a test, compare with the committed copy and rewrite it under `SCULL_BLESS` / `KETCH_BLESS`; Mailune's B6 C ABI needs the same. New crate `abi-drift`: `Drift` (compare with LF line endings, a unified diff on drift, bless from a flag or a named variable, the regenerate command in the message) and `cbindgen_header` / `csbindgen_file` behind default features. Done means: the crate is in the workspace with a fixture FFI crate whose committed header and C# file are checked, and tests for a stale copy showing its diff, blessing, a missing copy and CRLF, registered for CI dry-run publish, bump, README, sonar and the root `toolchain.md`.
+
+Plan:
+1. `abi-drift/` with the member files of `wasm-plugin-host`. Edition 2021, `rust-version` 1.86 (ketch). `cbindgen 0.29.4` (library only) and `csbindgen 1.9.8` as optional default features, as scull and ketch lock them; `similar 3.2` for the diff, as `change-preview` uses it.
+2. The shared `check_drift` of both tests becomes `Drift::check`, returning `Error::Stale` with the diff instead of panicking; `Debug` prints the same text so a test's `?` shows it.
+3. `tests/fixtures/ffi` (source, `cbindgen.toml`, committed header and C# file, regenerated with `ABI_DRIFT_BLESS=1`) and `tests/drift.rs`.
+4. Register as T21 did; the package ships only `src`, `tests` and `README.md`.
+5. Check: fmt, clippy `-D warnings` with and without default features, `cargo test --workspace --locked`, `cargo publish --dry-run -p abi-drift --locked`, `cargo +1.86 check -p abi-drift`.
+
+Left: review and merge; GitHub Actions must be enabled on this repository and `CARGO_REGISTRY_TOKEN` must cover `abi-drift` before its first `bump.yml` run. scull, ketch and Mailune migrate once the crate is on crates.io.
