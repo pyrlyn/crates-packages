@@ -94,7 +94,9 @@ Plan:
 4. Register: workspace members, `ci.yml` dry-run publish and an `otlp` feature test on Linux, `bump.yml` package option, root README crate table and token scope, `sonar-project.properties`, root `toolchain.md`.
 5. Check: `cargo test --workspace --locked`, the same with `-p telemetry-setup --features otlp`, clippy `-D warnings` with and without the feature, fmt, `cargo publish --dry-run -p telemetry-setup --locked`, `cargo +1.98 check -p telemetry-setup --all-features`.
 
-Left: review and merge. Consumers cannot migrate until the crate is on crates.io (`rust.md`: a registry version plus a local `paths` override, never a bare path), and publishing it is the creator's call.
+Checked locally on 2026-10-10 (fmt, clippy with and without `otlp`, workspace tests, the `otlp` tests, `cargo +1.98 check --all-features`, `cargo publish --dry-run -p telemetry-setup --locked`): all pass. The package ships only `src`, `tests` and `README.md`.
+
+Left: review and merge; GitHub Actions is disabled on this repository, so neither CI nor `bump.yml` can run until it is enabled; the `CARGO_REGISTRY_TOKEN` scope must add `telemetry-setup` before its first `bump.yml` run. Consumers migrate once the crate is on crates.io (`rust.md`: a registry version plus a local `paths` override, never a bare path).
 
 ### T13. app-home: one home, app-home and XDG resolver
 
