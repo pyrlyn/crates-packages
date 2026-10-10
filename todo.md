@@ -17,3 +17,4 @@
 - T22.2. gettext-catalog: localizer with negotiation and fallback
 - T23. sqlite-change-feed: cross-process SQLite change feed
 - T24. abi-drift: drift tests for generated bindings
+- T25. keychain-secret: secrets from the environment or the OS keychain

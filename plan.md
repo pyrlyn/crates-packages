@@ -25,6 +25,7 @@ Cargo workspace of five small published crates shared by ketch and rtok — git-
 | T22.2 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
 | T23 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
 | T24 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
+| T25 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
 
 Audit note (2026-10-07): verified defenses — git argument injection refused, POSIX shell quoting correct, path traversal blocked, fail-safe direction is always "everything changed". The tasks below are what remains.
 
@@ -160,3 +161,15 @@ Plan:
 5. Check: fmt, clippy `-D warnings` with and without default features, `cargo test --workspace --locked`, `cargo publish --dry-run -p abi-drift --locked`, `cargo +1.86 check -p abi-drift`.
 
 Left: review and merge; GitHub Actions must be enabled on this repository and `CARGO_REGISTRY_TOKEN` must cover `abi-drift` before its first `bump.yml` run. scull, ketch and Mailune migrate once the crate is on crates.io.
+
+### T25. keychain-secret: secrets from the environment or the OS keychain
+
+Approved by the creator as Mailune's X2 (2026-10-10: extract the shared code and publish it through release-plz; the crates.io name `secret-store` belongs to someone else, so the crate is `keychain-secret`). runa (`runa-cloud/src/secrets.rs`), cox (`cox-provider-http` `resolve_key_with` and its `no_real_keychain_in_tests` guard) and aulo (`aulo-server/src/auth/token.rs`) each resolve a secret from an environment variable, then the keyring, keep it out of logs, and keep tests off the real keychain; runa also refuses inline keys in config files. Mailune's C1 needs all of it. New crate `keychain-secret`. Done means: one implementation in the workspace with a redacted `Secret`, a `SecretStore` trait with `Keychain`, `MemoryStore` and `NoStore`, `resolve` (env, then store), the keychain switch, `reject_inline_secrets`, and the no-real-keychain `guard` scanner, with tests that never touch the keychain, registered for CI dry-run publish, bump, README, sonar and the root `toolchain.md`.
+
+Plan:
+1. `keychain-secret/` with the member files of `wasm-plugin-host`. Edition 2024, `rust-version` 1.98 (cox, runa). `keyring 4.2.0`, `toml 0.9.12`, as the consumers lock them.
+2. From aulo: the redacted secret type and the store trait with keychain and memory stores (keyring errors keep only their message). From cox and runa: env-then-store resolution with an injectable lookup, returning `None` so each caller decides what a missing key means, and the `COX_KEYRING=off` switch as `keychain_enabled`/`os_store`. From runa: `reject_inline_secrets`, plus `password`, `client_secret` and `refresh_token`. From cox: the guard scanner, walking any repository root with caller-given patterns; it also treats `'"'` as a character, not a string start.
+3. Register as T21 did; the package ships only `src` and `README.md`.
+4. Check: fmt, clippy `-D warnings`, `cargo test --workspace --locked`, `cargo publish --dry-run -p keychain-secret --locked`.
+
+Left: review and merge; GitHub Actions must be enabled on this repository and `CARGO_REGISTRY_TOKEN` must cover `keychain-secret` before its first `bump.yml` run. The first consumer (Mailune C1, or runa) migrates once the crate is on crates.io.

@@ -26,6 +26,7 @@ Direct dependencies of the workspace members. Path crates are this repo.
 | gettext-catalog | local | https://github.com/pyrlyn/crates-packages | gettext catalogs, plural rules and fallback |
 | sqlite-change-feed | local | https://github.com/pyrlyn/crates-packages | Cross-process SQLite change feed |
 | abi-drift | local | https://github.com/pyrlyn/crates-packages | Drift tests for generated bindings |
+| keychain-secret | local | https://github.com/pyrlyn/crates-packages | Secrets from the environment or the OS keychain |
 | anyhow | local | https://github.com/dtolnay/anyhow | Top-level errors of `scoped-check` |
 | assert_cmd | local | https://github.com/assert-rs/assert_cmd | Tests that run the `scoped-check` binary |
 | clap | local | https://github.com/clap-rs/clap | `scoped-check` CLI |
@@ -55,6 +56,8 @@ Direct dependencies of the workspace members. Path crates are this repo.
 | cbindgen | local | https://github.com/mozilla/cbindgen | `abi-drift` renders C headers |
 | csbindgen | local | https://github.com/Cysharp/csbindgen | `abi-drift` renders C# bindings |
 | similar | local | https://github.com/mitsuhiko/similar | Unified diffs in `abi-drift` and `change-preview` |
+| toml | local | https://github.com/toml-rs/toml | Gate and scoped-check config; `keychain-secret` inline-secret check |
+| keyring | local | https://github.com/open-source-cooperative/keyring-rs | `keychain-secret` reaches the OS keychain |
 
 ## ketch
 
