@@ -11,6 +11,7 @@ Cargo workspace of five small Rust crates shared by ketch and rtok:
 | `cargo-changed-packages` | Workspace packages a set of changed paths affects, including reverse dependencies |
 | `file-backup` | Copy a file to `<name>.bak-<unix-seconds>` beside it before replacing it |
 | `git-changed-paths` | Paths a git working tree changed relative to a base ref |
+| `keychain-secret` | Application secrets from an environment variable or the OS keychain, never a config file, with a test guard against the real keychain |
 | `path-gates` | Map changed paths to named gates by glob rules from a TOML config |
 | `scoped-check` | Binary that runs only the check commands a change touches |
 | `wasm-plugin-host` | WebAssembly plugin host (extism) shared by cox and scull: worker per plugin, memory cap, deadlines |
