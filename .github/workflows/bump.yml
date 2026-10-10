@@ -41,6 +41,7 @@ on:
           - shell-classify
           - speech-capture
           - text-sanitize
+          - wasm-plugin-host
       dry-run:
         description: open the version pull request and wait for its checks, then close it
         default: false

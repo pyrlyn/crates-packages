@@ -27,6 +27,7 @@ Small, focused Rust crates shared by `ketch` and `rtok`.
 | [`shell-classify`](shell-classify) | Rate a bash command line `ReadOnly`/`Write`/`Exec`/`Destructive` and list the simple commands it runs (not published yet) |
 | [`speech-capture`](speech-capture) | Microphone capture, audio decode, 16 kHz resampling and an energy VAD for speech-to-text, optional whisper.cpp (not published yet) |
 | [`text-sanitize`](text-sanitize) | Make untrusted text safe to print: strips terminal escapes, control characters, bidi overrides and invisibles |
+| [`wasm-plugin-host`](wasm-plugin-host) | Run WebAssembly plugins with extism: a worker thread per plugin, memory cap, per-call deadlines, control lane before events |
 
 ## Commands
 
@@ -55,6 +56,8 @@ cargo fmt --all -- --check
   `agent-loop`; `file-backup` before `agent-host-config`. Those dependency
   lines carry both `path` and `version`, so `cargo publish` fails while a
   sibling is not on crates.io yet.
+- On crates.io: `file-backup`. `change-preview` and `wasm-plugin-host` are publish-ready (CI runs their
+  publish dry-run) and go out with their first bump. The other crates are not published yet.
 
 Secrets: `CARGO_REGISTRY_TOKEN` (crates.io API token) and
 `RELEASE_PLZ_TOKEN` (a PAT that can trigger workflows; bump opens the
