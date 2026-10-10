@@ -172,17 +172,18 @@ async fn run_one(
     cwd: &PathBuf,
 ) -> HookOutcome {
     let failed = |error: String| HookOutcome::Failed { error };
-    let mut child = match Command::new(shell)
-        .arg("-c")
+    let mut cmd = Command::new(shell);
+    cmd.arg("-c")
         .arg(command)
         .current_dir(cwd)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .process_group(0)
-        .kill_on_drop(true)
-        .spawn()
-    {
+        .kill_on_drop(true);
+    // Own process group, so a timeout can kill the hook's children too (Unix only).
+    #[cfg(unix)]
+    cmd.process_group(0);
+    let mut child = match cmd.spawn() {
         Ok(child) => child,
         Err(e) => return failed(format!("spawn failed: {e}")),
     };
@@ -195,13 +196,16 @@ async fn run_one(
         Ok(Ok(out)) => out,
         Ok(Err(e)) => return failed(format!("wait failed: {e}")),
         Err(_) => {
-            // `kill_on_drop` took the shell; the group takes its children.
+            // `kill_on_drop` took the shell; on Unix the group takes its children.
+            #[cfg(unix)]
             if let Some(pid) = pid {
                 let _ = nix::sys::signal::killpg(
                     nix::unistd::Pid::from_raw(pid as i32),
                     nix::sys::signal::Signal::SIGKILL,
                 );
             }
+            #[cfg(not(unix))]
+            let _ = pid;
             return failed(format!("timed out after {}s", limit.as_secs()));
         }
     };
