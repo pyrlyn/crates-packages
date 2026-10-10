@@ -20,8 +20,8 @@ Cargo workspace of five small published crates shared by ketch and rtok — git-
 | T13 | in progress | P1 | 2 | 90% | Claude / opus-5.5 |
 | T20.2 | todo | P1 | 3 | 0% | |
 | T20.3 | todo | P2 | 4 | 0% | |
-| T22.1 | in progress | P1 | 2 | 0% | Cursor / claude-opus-5.5 |
-| T22.2 | in progress | P1 | 2 | 0% | Cursor / claude-opus-5.5 |
+| T22.1 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
+| T22.2 | in progress | P1 | 2 | 90% | Cursor / claude-opus-5.5 |
 
 Audit note (2026-10-07): verified defenses — git argument injection refused, POSIX shell quoting correct, path traversal blocked, fail-safe direction is always "everything changed". The tasks below are what remains.
 
